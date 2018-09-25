@@ -102,6 +102,7 @@ int main(int argc, char** argv)
     readSocket = do_accept(sock, sock_addr);
 
     char * buf = malloc(1000);
+    
     for (;;)
     {
 

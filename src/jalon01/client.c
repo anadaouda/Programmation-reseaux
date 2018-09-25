@@ -8,25 +8,10 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-/*
-void get_addr_info(const char* address, const char* port, struct addrinfo** res){
-
-    int status;
-    struct addrinfo hints;
-
-    memset(&hints,0,sizeof(hints));
-
-    hints.ai_family=AF_INET;
-    hints.ai_socktype=SOCK_STREAM;
-
-    status = getaddrinfo(address,port,&hints,res);
-
-}
-*/
+#include <limits.h>
 
 struct sockaddr_in get_addr_info() {
-    struct sockaddr_in  sock_server;
+    struct sockaddr_in sock_server;
 
     memset(&sock_server, '\0', sizeof(sock_server));
     sock_server.sin_family = AF_INET;
@@ -40,48 +25,56 @@ int do_socket() {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock == -1) {
-    perror("socket invalide");
+    perror("Socket");
     exit(EXIT_FAILURE);
   }
   return sock;
 }
 
-void do_connect(int sock, struct sockaddr * sock_host) {
-  //printf("%i", resConnect);
-  if (connect(sock, sock_host, sizeof(struct sockaddr_in)) == -1) {
-    perror("connect invalide");
+void do_connect(int sock, struct sockaddr * sock_server) {
+  if (connect(sock, sock_server, sizeof(struct sockaddr_in)) == -1) {
+    perror("Connect");
     exit(EXIT_FAILURE);
   }
 }
 
 
-char* do_readline() {
-  printf("Bonjour, donner le message à envoyer\n");
-  char* chaine = malloc(100*sizeof(char));
+char * message_to_send() {
+  char * chaine = malloc(100*sizeof(char)); /// Changer un truc ici
+
+  printf("Message à envoyer :\n");
   scanf("%s", chaine);
+
   return chaine;
 }
 
-void do_send(int sock, char * msg, size_t len ,int flags) {
-
-  if (send(sock,msg,len,flags) == -1) {
-    perror("send invalide");
+void do_send(int sock) {
+  char * buffer = message_to_send();
+  if (send(sock, buffer, (size_t)sizeof(buffer)/sizeof(char), 0) == -1) {
+    perror("Send");
     exit(EXIT_FAILURE);
   }
 }
 
-void do_read(int sock, void * buf) {
-  int reception = recv(sock, buf, 1024, 0);
+void do_receive(int sock, void * buffer) {
+  int reception = recv(sock, buffer, SSIZE_MAX, 0);
     if (reception == -1) {
-      perror("Read marche pas");
+      perror("Recieve");
       exit(EXIT_FAILURE);
     }
-    if (!strcmp(buf,"/quit")) {
+    if (!strcmp(buffer,"/quit")) {
       printf("Au revoir\n");
       close(sock);
-      free(buf);
+      free(buffer);
       exit(1);
     }
+}
+
+void handle_client_message(int sock) {
+  char * buffer = malloc(100);
+  do_receive(sock, buffer);
+  printf("Le serveur à renvoyé : %s\n",buffer);
+
 }
 
 int main(int argc,char** argv)
@@ -94,13 +87,6 @@ int main(int argc,char** argv)
         //return 1;
     }
 
-//get address info from the server
-/*
-struct addrinfo* res = malloc(sizeof(struct addrinfo));
-get_addr_info("127.1.0.0", "33000", &res);
-struct sockaddr * sock_host = malloc(sizeof(struct sockaddr));
-sock_host = res->ai_addr;
-*/
 
 struct sockaddr_in sock_host = get_addr_info();
 //get the socket
@@ -109,18 +95,12 @@ int sock = do_socket();
 //connect to remote socket
 do_connect(sock, (struct sockaddr * )&sock_host);
 
-char * message = malloc(1000);
-char * buf = malloc(1000);
-int * len = malloc(sizeof(int));
 //get user input
 while(1){
-  message = do_readline();
-  *len = sizeof(message)/sizeof(char);
   //send message to the server
-  do_send(sock,message,(size_t)len ,0);
-  do_read(sock, buf);
-  printf("Le serveur à renvoyé : %s\n",buf);
-  //handle_client_message()
+  do_send(sock);
+
+  handle_client_message(sock);
 
 }
 
