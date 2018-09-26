@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -38,25 +37,23 @@ void do_connect(int sock, struct sockaddr * sock_server) {
   }
 }
 
-
-char * message_to_send() {
-  char * chaine = malloc(100*sizeof(char)); /// Changer un truc ici
-
+//get user input
+void message_to_send(char * buffer) {
+  memset(buffer, '\0', strlen(buffer));
   printf("Message à envoyer :\n");
-  scanf("%s", chaine);
-
-  return chaine;
+  scanf("%s", buffer);
 }
 
-void do_send(int sock) {
-  char * buffer = message_to_send();
-  if (send(sock, buffer, (size_t)sizeof(buffer)/sizeof(char), 0) == -1) {
+void do_send(int sock, char * buffer) {
+  message_to_send(buffer);
+
+  if (send(sock, buffer, strlen(buffer), 0) == -1) {
     perror("Send");
     exit(EXIT_FAILURE);
   }
 }
 
-void do_receive(int sock, void * buffer) {
+void do_receive(int sock, char * buffer) {
   int reception = recv(sock, buffer, SSIZE_MAX, 0);
     if (reception == -1) {
       perror("Recieve");
@@ -70,8 +67,7 @@ void do_receive(int sock, void * buffer) {
     }
 }
 
-void handle_client_message(int sock) {
-  char * buffer = malloc(100);
+void handle_client_message(int sock, char * buffer) {
   do_receive(sock, buffer);
   printf("Le serveur à renvoyé : %s\n",buffer);
 
@@ -88,23 +84,22 @@ int main(int argc,char** argv)
     }
 
 
-struct sockaddr_in sock_host = get_addr_info();
+struct sockaddr_in sock_server = get_addr_info();
 //get the socket
 int sock = do_socket();
 
 //connect to remote socket
-do_connect(sock, (struct sockaddr * )&sock_host);
+do_connect(sock, (struct sockaddr * )&sock_server);
 
-//get user input
-while(1){
+char * buffer = malloc(100*sizeof(char));
+
+while(1) {
   //send message to the server
-  do_send(sock);
+  do_send(sock, buffer);
 
-  handle_client_message(sock);
+  handle_client_message(sock, buffer);
 
 }
-
-
 
     return 0;
 

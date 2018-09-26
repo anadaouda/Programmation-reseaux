@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <limits.h>
 
 
 
@@ -13,7 +14,7 @@ int do_socket() {
   int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
   if (sock == -1) {
-    perror("Socket invalide");
+    perror("Socket");
     exit(EXIT_FAILURE);
   }
   return sock;
@@ -32,49 +33,50 @@ struct sockaddr_in init_serv_addr() {
 
 void do_bind(int sock, struct sockaddr_in sock_addr) {
   if (bind(sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == -1) {
-    perror("bind invalide");
+    perror("Bind");
     exit(EXIT_FAILURE);
   }
 }
 
 void do_listen(int sock) {
   if (listen(sock, SOMAXCONN) == -1) {
-    perror("listen invalide");
+    perror("Listen");
     exit(EXIT_FAILURE);
   }
 }
 
 int do_accept(int sock, struct sockaddr_in sock_addr) {
   int addrlen = sizeof(struct sockaddr);
-  int readSocket = accept(sock, (struct sockaddr *) &sock_addr, (socklen_t *)&addrlen);
-  if ( readSocket == -1) {
-    perror("accept invalide");
+  int rdwr_socket = accept(sock, (struct sockaddr *) &sock_addr, (socklen_t *)&addrlen);
+  if (rdwr_socket == -1) {
+    perror("Accept");
     exit(EXIT_FAILURE);
   }
-  return readSocket;
+  return rdwr_socket;
 }
 
 
-void do_write(int sock, char * msg, size_t len) {
-  if (send(sock,msg,len,0) == -1) {
-    perror("send invalide");
+void do_write(int sock, char * message) {
+  if (send(sock,message,strlen(message),0) == -1) {
+    perror("Send");
     exit(EXIT_FAILURE);
   }
 }
 
-void do_read(int sock, char * buf) {
-  int reception = recv(sock, buf, 10240, 0);
+void do_read(int sock, char * buffer) {
+  memset(buffer, '\0', strlen(buffer));
+  int reception = recv(sock, buffer, SSIZE_MAX, 0);
     if (reception == -1) {
-      perror("Read marche pas");
+      perror("Read");
       exit(EXIT_FAILURE);
     }
-    if (!strcmp(buf,"/quit")) {
+    if (!strcmp(buffer,"/quit")) {
       printf("Au revoir\n");
-      do_write(sock,"/quit", 10);
+      do_write(sock,"/quit");
       close(sock);
       exit(1);
     }
-    printf("Le serveur a recu : %s\n", buf);
+    printf("Le serveur a recu : %s\n", buffer);
 }
 
 int main(int argc, char** argv)
@@ -98,22 +100,22 @@ int main(int argc, char** argv)
     //specify the socket to be a server socket and listen for at most 20 concurrent client
     do_listen(sock);
     //accept connection from client
-    int readSocket;
-    readSocket = do_accept(sock, sock_addr);
 
-    char * buf = malloc(1000);
-    
+    int rdwr_socket = do_accept(sock, sock_addr);
+
+    char * buffer = malloc(100);
+
     for (;;)
     {
 
-
         //read what the client has to say
-        do_read(readSocket, buf);
+        do_read(rdwr_socket, buffer);
 
         //we write back to the client
-        do_write(readSocket, buf, (size_t)sizeof(buf)/sizeof(char));
+        do_write(rdwr_socket, buffer);
 
         //clean up client socket
+
     }
 
     //clean up server socket
