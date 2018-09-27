@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #include <limits.h>
 
+#define MAX_BUFFER_SIZE 100
+
 struct sockaddr_in get_addr_info() {
     struct sockaddr_in sock_server;
 
@@ -22,11 +24,17 @@ struct sockaddr_in get_addr_info() {
 
 int do_socket() {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
+  int yes = 1;
 
   if (sock == -1) {
     perror("Socket");
     exit(EXIT_FAILURE);
   }
+
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+    perror("ERROR setting socket options");
+  }
+
   return sock;
 }
 
@@ -59,6 +67,12 @@ void do_receive(int sock, char * buffer) {
       perror("Recieve");
       exit(EXIT_FAILURE);
     }
+    if (!strcmp(buffer, "/serverOverload")) {
+      printf("Server cannot accept incoming connections anymore. Try again later\n");
+      close(sock);
+      free(buffer);
+      exit(1);
+    }
     if (!strcmp(buffer,"/quit")) {
       printf("Au revoir\n");
       close(sock);
@@ -70,12 +84,12 @@ void do_receive(int sock, char * buffer) {
 void handle_client_message(int sock, char * buffer) {
   do_receive(sock, buffer);
   printf("Le serveur à renvoyé : %s\n",buffer);
+  fflush(stdout);
 
 }
 
 int main(int argc,char** argv)
 {
-
 
     if (argc != 3)
     {
@@ -91,13 +105,14 @@ int sock = do_socket();
 //connect to remote socket
 do_connect(sock, (struct sockaddr * )&sock_server);
 
-char * buffer = malloc(100*sizeof(char));
+char * buffer = malloc(MAX_BUFFER_SIZE);
 
 while(1) {
   //send message to the server
+  handle_client_message(sock, buffer);
+
   do_send(sock, buffer);
 
-  handle_client_message(sock, buffer);
 
 }
 

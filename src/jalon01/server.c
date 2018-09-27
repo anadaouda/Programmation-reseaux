@@ -7,16 +7,25 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
+#include <poll.h>
 
+#define MAX_BUFFER_SIZE 100
+#define MAX_FD 4
 
 
 int do_socket() {
   int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  int yes = 1;
 
   if (sock == -1) {
     perror("Socket");
     exit(EXIT_FAILURE);
   }
+
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+    perror("ERROR setting socket options");
+  }
+
   return sock;
 }
 
@@ -56,27 +65,37 @@ int do_accept(int sock, struct sockaddr_in sock_addr) {
 }
 
 
-void do_write(int sock, char * message) {
-  if (send(sock,message,strlen(message),0) == -1) {
+void do_write(int rdwr_sock, char * message) {
+  if (send(rdwr_sock,message,strlen(message),0) == -1) {
     perror("Send");
     exit(EXIT_FAILURE);
   }
 }
 
-void do_read(int sock, char * buffer) {
+void do_read(int rdwr_sock, int sock, char * buffer) {
   memset(buffer, '\0', strlen(buffer));
-  int reception = recv(sock, buffer, SSIZE_MAX, 0);
+  int reception = recv(rdwr_sock, buffer, SSIZE_MAX, 0);
     if (reception == -1) {
       perror("Read");
       exit(EXIT_FAILURE);
     }
     if (!strcmp(buffer,"/quit")) {
       printf("Au revoir\n");
-      do_write(sock,"/quit");
-      close(sock);
+      do_write(rdwr_sock,"/quit");
+      free(buffer);
+      close(rdwr_sock);
       exit(1);
     }
     printf("Le serveur a recu : %s\n", buffer);
+}
+
+int searchPollIn(struct pollfd structPoll[]) {
+  int i = 1;
+
+  while ((i < MAX_FD) && (structPoll[i].events == POLLIN)) {
+    i++;
+  }
+  return i;
 }
 
 int main(int argc, char** argv)
@@ -88,7 +107,6 @@ int main(int argc, char** argv)
   }
     //create the socket, check for validity!
     int sock = do_socket();
-    printf("Numéro de socket : %i\n", sock);
 
     //init the serv_add structure
     struct sockaddr_in sock_addr = init_serv_addr();
@@ -101,18 +119,54 @@ int main(int argc, char** argv)
     do_listen(sock);
     //accept connection from client
 
-    int rdwr_socket = do_accept(sock, sock_addr);
 
-    char * buffer = malloc(100);
+    struct pollfd structPoll[MAX_FD];
+    structPoll[0].fd = sock;
+    structPoll[0].events = POLLIN;
+    printf("sock_server = %i\n",sock);
+    fflush(stdout);
 
-    for (;;)
+
+
+    int rdwr_sock;
+    int i;
+    int resPoll;
+
+    char * buffer = malloc(MAX_BUFFER_SIZE);
+
+    while(1)
     {
 
-        //read what the client has to say
-        do_read(rdwr_socket, buffer);
+      resPoll = poll(structPoll, MAX_FD, -1);
 
-        //we write back to the client
-        do_write(rdwr_socket, buffer);
+      if (structPoll[0].revents == POLLIN) {
+        if (resPoll >= MAX_FD) {
+          rdwr_sock = do_accept(sock, sock_addr);
+          do_write(rdwr_sock, "/serverOverload");
+          close(rdwr_sock);
+        }
+        else if (resPoll == -1) {
+          perror("Poll");
+          exit(EXIT_FAILURE);
+        }
+        else {
+           rdwr_sock = do_accept(sock, sock_addr);
+           i = searchPollIn(structPoll);
+           structPoll[i].fd = rdwr_sock;
+           structPoll[i].events = POLLIN;
+           do_write(structPoll[i].fd, "connecte");
+
+        }
+      }
+//      else {
+        for (i = 1; i < MAX_FD; i++) {
+          if (structPoll[i].revents == POLLIN) {
+            do_read(structPoll[i].fd, sock, buffer);
+            do_write(structPoll[i].fd, "message recu");
+//      }
+    }
+  }
+
 
         //clean up client socket
 
