@@ -49,7 +49,8 @@ void do_connect(int sock, struct sockaddr * sock_server) {
 void message_to_send(char * buffer) {
   memset(buffer, '\0', strlen(buffer));
   printf("Message à envoyer :\n");
-  scanf("%s", buffer);
+  fgets(buffer,MAX_BUFFER_SIZE*sizeof(char),stdin);
+  //scanf("%[^\n]s", buffer);
 }
 
 void do_send(int sock, char * buffer) {
@@ -110,7 +111,7 @@ int sock = do_socket();
 //connect to remote socket
 do_connect(sock, (struct sockaddr * )&sock_server);
 
-char * buffer = malloc(MAX_BUFFER_SIZE);
+char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
 while(1) {
   //send message to the server

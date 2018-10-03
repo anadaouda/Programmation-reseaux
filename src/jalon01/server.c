@@ -10,7 +10,7 @@
 #include <poll.h>
 
 #define MAX_BUFFER_SIZE 100
-#define MAX_FD 5
+#define MAX_FD 20
 
 
 int do_socket() {
@@ -66,7 +66,6 @@ int do_accept(int sock, struct sockaddr_in sock_addr) {
 
 
 void do_write(int rdwr_sock, char * message) {
-  printf("Socket send : %i\n\n", rdwr_sock);
   if (send(rdwr_sock,message,strlen(message),0) == -1) {
     perror("Send");
     exit(EXIT_FAILURE);
@@ -80,7 +79,8 @@ void closeInPoll (int rdwr_sock, struct pollfd structPoll[]) {
     i++;
   }
 
-  structPoll[i].events = 0;
+  memset(&structPoll[i], '\0', sizeof(struct pollfd));
+
 }
 
 void do_read(int rdwr_sock, int sock, char * buffer, struct pollfd structPoll[]) {
@@ -90,10 +90,9 @@ void do_read(int rdwr_sock, int sock, char * buffer, struct pollfd structPoll[])
       perror("Read");
       exit(EXIT_FAILURE);
     }
-    if (!strcmp(buffer,"/quit")) {
-      closeInPoll(rdwr_sock, structPoll);
+    if (!strcmp(buffer,"/quit\n")) {
       do_write(rdwr_sock,"You will be terminated");
-      //free(buffer);
+      closeInPoll(rdwr_sock, structPoll);
       close(rdwr_sock);
     }
     printf("[%i] : %s\n",rdwr_sock, buffer);
@@ -108,6 +107,17 @@ int searchPollIn(struct pollfd structPoll[]) {
   return i;
 }
 
+int numberPoll(struct pollfd structPoll[]) {
+  int i;
+  int nbPoll = 0;
+
+  for (i = 1; i < MAX_FD + 1; i++) {
+    if (structPoll[i].events == POLLIN) {
+      nbPoll++;
+    }
+  }
+  return nbPoll;
+}
 
 int main(int argc, char** argv) {
 
@@ -134,25 +144,25 @@ int main(int argc, char** argv) {
     //accept connection from client
 
 
-    struct pollfd structPoll[MAX_FD];
+    struct pollfd structPoll[MAX_FD + 1];
+    memset(structPoll, '\0', sizeof(struct pollfd)*(MAX_FD + 1));
     structPoll[0].fd = sock;
     structPoll[0].events = POLLIN;
-
 
 
     int rdwr_sock;
     int i;
     int resPoll;
 
-    char * buffer = malloc(MAX_BUFFER_SIZE);
+    char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
     while(1)
     {
 
-      resPoll = poll(structPoll, MAX_FD, -1);
+      resPoll = poll(structPoll, MAX_FD + 1, -1);
 
       if (structPoll[0].revents == POLLIN) {
-        if (resPoll >= MAX_FD) {
+        if (numberPoll(structPoll) >= MAX_FD) {
           rdwr_sock = do_accept(sock, sock_addr);
           do_write(rdwr_sock, "/serverOverload");
           close(rdwr_sock);
@@ -170,17 +180,15 @@ int main(int argc, char** argv) {
 
         }
       }
-//      else {
-        for (i = 1; i < MAX_FD; i++) {
+     else {
+        for (i = 1; i < MAX_FD + 1; i++) {
           if (structPoll[i].revents == POLLIN) {
             do_read(structPoll[i].fd, sock, buffer, structPoll);
+            if (structPoll[i].fd != 0) {
               do_write(structPoll[i].fd, buffer);
-//      }
+            }
+     }
     }
-  //   else if (structPoll[i].revents == POLLHUP) {
-  //     while(1);
-  //     //do_write(structPoll[0].fd, buffer);
-  // }
 
         //clean up client socket
 
