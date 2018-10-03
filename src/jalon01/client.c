@@ -54,20 +54,47 @@ void message_to_send(char * buffer) {
 }
 
 void do_send(int sock, char * buffer) {
+  int strSend;
   message_to_send(buffer);
+  int lenBuffer = strlen(buffer);
 
-  if (send(sock, buffer, strlen(buffer), 0) == -1) {
-    perror("Send");
-    exit(EXIT_FAILURE);
-  }
+  do {
+    strSend = send(sock,&lenBuffer,sizeof(int),0);
+    if (strSend == -1) {
+      perror("Send");
+      exit(EXIT_FAILURE);
+    }
+  } while (strSend != sizeof(int));
+
+  do {
+    strSend = send(sock,buffer,strlen(buffer),0);
+    if (strSend == -1) {
+      perror("Send");
+      exit(EXIT_FAILURE);
+    }
+  } while (strSend != strlen(buffer));
+
+
+
 }
 
 void do_receive(int sock, char * buffer) {
-  int reception = recv(sock, buffer, SSIZE_MAX, 0);
-    if (reception == -1) {
-      perror("Recieve");
+  int strReceived, strSizeToReceive;
+  do {
+    strReceived = recv(sock, &strSizeToReceive, sizeof(int), 0);
+    if (strReceived == -1) {
+      perror("Receive");
       exit(EXIT_FAILURE);
     }
+  } while (strReceived != sizeof(int));
+
+  do {
+    strReceived = recv(sock, buffer, SSIZE_MAX, 0);
+    if (strReceived == -1) {
+      perror("Receive");
+      exit(EXIT_FAILURE);
+    }
+  } while (strReceived != strSizeToReceive);
 }
 
 void handle_client_message(int sock, char * buffer) {

@@ -66,10 +66,24 @@ int do_accept(int sock, struct sockaddr_in sock_addr) {
 
 
 void do_write(int rdwr_sock, char * message) {
-  if (send(rdwr_sock,message,strlen(message),0) == -1) {
-    perror("Send");
-    exit(EXIT_FAILURE);
-  }
+  int strSend;
+  int lenMessage = strlen(message);
+
+  do {
+    strSend = send(rdwr_sock,&lenMessage,sizeof(int),0);
+    if (strSend == -1) {
+      perror("Send");
+      exit(EXIT_FAILURE);
+    }
+  } while (strSend != sizeof(int));
+
+  do {
+    strSend = send(rdwr_sock,message,strlen(message),0);
+    if (strSend == -1) {
+      perror("Send");
+      exit(EXIT_FAILURE);
+    }
+  } while (strSend != strlen(message));
 }
 
 void closeInPoll (int rdwr_sock, struct pollfd structPoll[]) {
@@ -85,11 +99,24 @@ void closeInPoll (int rdwr_sock, struct pollfd structPoll[]) {
 
 void do_read(int rdwr_sock, int sock, char * buffer, struct pollfd structPoll[]) {
   memset(buffer, '\0', strlen(buffer));
-  int reception = recv(rdwr_sock, buffer, SSIZE_MAX, 0);
-    if (reception == -1) {
-      perror("Read");
+
+  int strReceived, strSizeToReceive;
+  do {
+    strReceived = recv(rdwr_sock, &strSizeToReceive, sizeof(int), 0);
+    if (strReceived == -1) {
+      perror("Receive");
       exit(EXIT_FAILURE);
     }
+  } while (strReceived != sizeof(int));
+
+  do {
+    strReceived = recv(rdwr_sock, buffer, SSIZE_MAX, 0);
+    if (strReceived == -1) {
+      perror("Receive");
+      exit(EXIT_FAILURE);
+    }
+  } while (strReceived != strSizeToReceive);
+
     if (!strcmp(buffer,"/quit\n")) {
       do_write(rdwr_sock,"You will be terminated");
       closeInPoll(rdwr_sock, structPoll);
