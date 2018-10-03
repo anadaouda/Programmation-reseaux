@@ -11,13 +11,13 @@
 
 #define MAX_BUFFER_SIZE 100
 
-struct sockaddr_in get_addr_info() {
+struct sockaddr_in get_addr_info(char** argv) {
     struct sockaddr_in sock_server;
 
     memset(&sock_server, '\0', sizeof(sock_server));
     sock_server.sin_family = AF_INET;
-    sock_server.sin_port = htons(33000);
-    inet_aton("127.0.0.1", &sock_server.sin_addr);
+    sock_server.sin_port = htons(atoi(argv[2]));
+    inet_aton(argv[1], &sock_server.sin_addr);
 
     return sock_server;
 }
@@ -67,38 +67,43 @@ void do_receive(int sock, char * buffer) {
       perror("Recieve");
       exit(EXIT_FAILURE);
     }
-    if (!strcmp(buffer, "/serverOverload")) {
-      printf("Server cannot accept incoming connections anymore. Try again later\n");
-      close(sock);
-      free(buffer);
-      exit(1);
-    }
-    if (!strcmp(buffer,"/quit")) {
-      printf("Au revoir\n");
-      close(sock);
-      free(buffer);
-      exit(1);
-    }
 }
 
 void handle_client_message(int sock, char * buffer) {
   do_receive(sock, buffer);
-  printf("Le serveur à renvoyé : %s\n",buffer);
+  printf("[SERVER] : %s\n\n",buffer);
   fflush(stdout);
+
+  if (!strcmp(buffer, "/serverOverload")) {
+    printf("Server cannot accept incoming connections anymore. Try again later\n");
+    close(sock);
+    free(buffer);
+    exit(1);
+  }
+  if (!strcmp(buffer,"You will be terminated")) {
+    close(sock);
+    free(buffer);
+    printf("Disconnected\n");
+    fflush(stdout);
+    exit(1);
+  }
 
 }
 
 int main(int argc,char** argv)
 {
 
-    if (argc != 3)
-    {
-        fprintf(stderr,"usage: RE216_CLIENT hostname port\n");
-        //return 1;
-    }
+  if (argc != 3)
+  {
+      fprintf(stderr,"Veuillez indiquer un numero une adresse IP et un numero de port\n\n");
+      return 1;
+  } else {
+    printf("usage: RE216_CLIENT %s %s\n", argv[1], argv[2]);
+    fflush(stdout);
+  }
 
 
-struct sockaddr_in sock_server = get_addr_info();
+struct sockaddr_in sock_server = get_addr_info(argv);
 //get the socket
 int sock = do_socket();
 
