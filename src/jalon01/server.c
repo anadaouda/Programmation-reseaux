@@ -12,217 +12,208 @@
 #define MAX_BUFFER_SIZE 100
 #define MAX_FD 20
 
-
+// creates the listening socket
 int do_socket() {
-  int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  int yes = 1;
+    int sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int yes = 1;
 
-  if (sock == -1) {
-    perror("Socket");
-    exit(EXIT_FAILURE);
-  }
+    if (sockServer == -1) {
+        perror("Socket");
+        exit(EXIT_FAILURE);
+    }
 
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-    perror("ERROR setting socket options");
-  }
+    if (setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+        perror("ERROR setting socket options");
+    }
 
-  return sock;
+    return sockServer;
 }
 
+// initiates the server's address
 struct sockaddr_in init_serv_addr(char ** argv) {
-  struct sockaddr_in sock_addr;
+    struct sockaddr_in sockAddr;
 
-  memset(&sock_addr, '\0', sizeof(sock_addr));
-  sock_addr.sin_family = AF_INET;
-  sock_addr.sin_port = htons(atoi(argv[1]));
-  inet_aton("127.0.0.1", &sock_addr.sin_addr);
+    memset(&sockAddr, '\0', sizeof(sockAddr));
+    sockAddr.sin_family = AF_INET;
+    sockAddr.sin_port = htons(atoi(argv[1]));
+    inet_aton("127.0.0.1", &sockAddr.sin_addr);
 
-  return sock_addr;
+    return sockAddr;
 }
 
-void do_bind(int sock, struct sockaddr_in sock_addr) {
-  if (bind(sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == -1) {
-    perror("Bind");
-    exit(EXIT_FAILURE);
-  }
-}
-
-void do_listen(int sock) {
-  if (listen(sock, SOMAXCONN) == -1) {
-    perror("Listen");
-    exit(EXIT_FAILURE);
-  }
-}
-
-int do_accept(int sock, struct sockaddr_in sock_addr) {
-  int addrlen = sizeof(struct sockaddr);
-  int rdwr_socket = accept(sock, (struct sockaddr *) &sock_addr, (socklen_t *)&addrlen);
-  if (rdwr_socket == -1) {
-    perror("Accept");
-    exit(EXIT_FAILURE);
-  }
-  return rdwr_socket;
-}
-
-
-void do_write(int rdwr_sock, char * message) {
-  int strSend;
-  int lenMessage = strlen(message);
-
-  do {
-    strSend = send(rdwr_sock,&lenMessage,sizeof(int),0);
-    if (strSend == -1) {
-      perror("Send");
-      exit(EXIT_FAILURE);
+void do_bind(int sockServer, struct sockaddr_in sockAddr) {
+    if (bind(sockServer, (struct sockaddr *) &sockAddr, sizeof(sockAddr)) == -1) {
+        perror("Bind");
+        exit(EXIT_FAILURE);
     }
-  } while (strSend != sizeof(int));
-
-  do {
-    strSend = send(rdwr_sock,message,strlen(message),0);
-    if (strSend == -1) {
-      perror("Send");
-      exit(EXIT_FAILURE);
-    }
-  } while (strSend != strlen(message));
 }
 
-void closeInPoll (int rdwr_sock, struct pollfd structPoll[]) {
-  int i = 1;
+void do_listen(int sockServer) {
+    if (listen(sockServer, MAX_FD) == -1) {
+        perror("Listen");
+        exit(EXIT_FAILURE);
+    }
+}
 
-  while ((i < MAX_FD) && (structPoll[i].fd != rdwr_sock)) {
-    i++;
-  }
+int do_accept(int sockServer, struct sockaddr_in sockAddr) {
+    int addrLen = sizeof(struct sockaddr);
+    int rdwrSock = accept(sockServer, (struct sockaddr *) &sockAddr, (socklen_t *)&addrLen);
+    if (rdwrSock == -1) {
+        perror("Accept");
+        exit(EXIT_FAILURE);
+    }
+    return rdwrSock;
+}
 
-  memset(&structPoll[i], '\0', sizeof(struct pollfd));
+
+void do_send(int rdwrSock, char * buffer) {
+    int strSent;
+    int messageLen = strlen(buffer);
+
+    do {
+        strSent = send(rdwrSock,&messageLen,sizeof(int),0);
+        if (strSent == -1) {
+            perror("Send");
+            exit(EXIT_FAILURE);
+        }
+    } while (strSent != sizeof(int));
+
+    do {
+        strSent = send(rdwrSock,buffer,strlen(buffer),0);
+        if (strSent == -1) {
+            perror("Send");
+            exit(EXIT_FAILURE);
+        }
+    } while (strSent != strlen(buffer));
+}
+
+void closeFd (int rdwrSock, struct pollfd structPollFd[]) {
+    int i = 1;
+
+    while ((i < MAX_FD) && (structPollFd[i].fd != rdwrSock)) {
+        i++;
+    }
+
+    memset(&structPollFd[i], '\0', sizeof(struct pollfd));
 
 }
 
-void do_read(int rdwr_sock, int sock, char * buffer, struct pollfd structPoll[]) {
-  memset(buffer, '\0', strlen(buffer));
+void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[]) {
+    memset(buffer, '\0', strlen(buffer));
 
-  int strReceived, strSizeToReceive;
-  do {
-    strReceived = recv(rdwr_sock, &strSizeToReceive, sizeof(int), 0);
-    if (strReceived == -1) {
-      perror("Receive");
-      exit(EXIT_FAILURE);
-    }
-  } while (strReceived != sizeof(int));
+    int strReceived, strSizeToReceive;
+    do {
+        strReceived = recv(rdwrSock, &strSizeToReceive, sizeof(int), 0);
+        if (strReceived == -1) {
+            perror("Receive");
+            exit(EXIT_FAILURE);
+        }
+    } while (strReceived != sizeof(int));
 
-  do {
-    strReceived = recv(rdwr_sock, buffer, SSIZE_MAX, 0);
-    if (strReceived == -1) {
-      perror("Receive");
-      exit(EXIT_FAILURE);
-    }
-  } while (strReceived != strSizeToReceive);
+    do {
+        strReceived = recv(rdwrSock, buffer, SSIZE_MAX, 0);
+        if (strReceived == -1) {
+            perror("Receive");
+            exit(EXIT_FAILURE);
+        }
+    } while (strReceived != strSizeToReceive);
 
     if (!strcmp(buffer,"/quit\n")) {
-      do_write(rdwr_sock,"You will be terminated");
-      closeInPoll(rdwr_sock, structPoll);
-      close(rdwr_sock);
+        do_send(rdwrSock,"You will be terminated");
+        closeFd(rdwrSock, structPollFd);
+        close(rdwrSock);
     }
-    printf("[%i] : %s\n",rdwr_sock, buffer);
+    printf("[%i] : %s\n",rdwrSock, buffer);
 }
 
-int searchPollIn(struct pollfd structPoll[]) {
-  int i = 1;
+// returns the index of an availabla space in the pollfd table
+int spacePollFd(struct pollfd structPollFd[]) {
+    int i = 1;
 
-  while ((i < MAX_FD) && (structPoll[i].events == POLLIN)) {
-    i++;
-  }
-  return i;
+    while ((i < MAX_FD) && (structPollFd[i].events == POLLIN)) {
+        i++;
+    }
+    return i;
 }
 
-int numberPoll(struct pollfd structPoll[]) {
-  int i;
-  int nbPoll = 0;
+// returns the nuber of active fds in the pollfd table
+int nbOpenFd(struct pollfd structPollFd[]) {
+    int i;
+    int openFd = 0;
 
-  for (i = 1; i < MAX_FD + 1; i++) {
-    if (structPoll[i].events == POLLIN) {
-      nbPoll++;
+    for (i = 1; i < MAX_FD + 1; i++) {
+        if (structPollFd[i].events == POLLIN) {
+            openFd++;
+        }
     }
-  }
-  return nbPoll;
+    return openFd;
 }
 
 int main(int argc, char** argv) {
-
-  if (argc != 2)
-  {
-      fprintf(stderr,"Veuillez indiquer un numero de port\n\n");
-      return 1;
-  } else {
-    printf("usage: RE216_SERVER %s\n", argv[1]);
-    fflush(stdout);
-  }
+    if (argc != 2) {
+        fprintf(stderr,"Veuillez indiquer un numero de port\n\n");
+        return 1;
+    } else {
+        printf("usage: RE216_SERVER %s\n", argv[1]);
+        fflush(stdout);
+    }
     //create the socket, check for validity!
-    int sock = do_socket();
+    int sockServer = do_socket();
 
     //init the serv_add structure
-    struct sockaddr_in sock_addr = init_serv_addr(argv);
+    struct sockaddr_in sockAddr = init_serv_addr(argv);
 
     //perform the binding
     //we bind on the tcp port specified
-    do_bind(sock, sock_addr);
+    do_bind(sockServer, sockAddr);
 
     //specify the socket to be a server socket and listen for at most 20 concurrent client
-    do_listen(sock);
-    //accept connection from client
+    do_listen(sockServer);
 
+    struct pollfd structPollFd[MAX_FD + 1];
+    memset(structPollFd, '\0', sizeof(struct pollfd)*(MAX_FD + 1));
+    structPollFd[0].fd = sockServer;
+    structPollFd[0].events = POLLIN;
 
-    struct pollfd structPoll[MAX_FD + 1];
-    memset(structPoll, '\0', sizeof(struct pollfd)*(MAX_FD + 1));
-    structPoll[0].fd = sock;
-    structPoll[0].events = POLLIN;
-
-
-    int rdwr_sock;
+    int rdwrSock;
     int i;
     int resPoll;
-
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
-    while(1)
-    {
+    while(1) {
+        resPoll = poll(structPollFd, MAX_FD + 1, -1);
 
-      resPoll = poll(structPoll, MAX_FD + 1, -1);
+        if (structPollFd[0].revents == POLLIN) {
+            if (nbOpenFd(structPollFd) >= MAX_FD) {
+                rdwrSock = do_accept(sockServer, sockAddr);
+                do_send(rdwrSock, "/serverOverload");
+                close(rdwrSock);
+            }
+            else if (resPoll == -1) {
+                perror("Poll");
+                exit(EXIT_FAILURE);
+            }
+            else {
+                //accept connection from client
+                rdwrSock = do_accept(sockServer, sockAddr);
+                i = spacePollFd(structPollFd);
+                structPollFd[i].fd = rdwrSock;
+                structPollFd[i].events = POLLIN;
+                do_send(structPollFd[i].fd, "connecte");
 
-      if (structPoll[0].revents == POLLIN) {
-        if (numberPoll(structPoll) >= MAX_FD) {
-          rdwr_sock = do_accept(sock, sock_addr);
-          do_write(rdwr_sock, "/serverOverload");
-          close(rdwr_sock);
-        }
-        else if (resPoll == -1) {
-          perror("Poll");
-          exit(EXIT_FAILURE);
+            }
         }
         else {
-           rdwr_sock = do_accept(sock, sock_addr);
-           i = searchPollIn(structPoll);
-           structPoll[i].fd = rdwr_sock;
-           structPoll[i].events = POLLIN;
-           do_write(structPoll[i].fd, "connecte");
-
-        }
-      }
-     else {
-        for (i = 1; i < MAX_FD + 1; i++) {
-          if (structPoll[i].revents == POLLIN) {
-            do_read(structPoll[i].fd, sock, buffer, structPoll);
-            if (structPoll[i].fd != 0) {
-              do_write(structPoll[i].fd, buffer);
+            //goes through the pollfd table to send and receive data
+            for (i = 1; i < MAX_FD + 1; i++) {
+                if (structPollFd[i].revents == POLLIN) {
+                    do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
+                    if (structPollFd[i].fd != 0) {
+                        do_send(structPollFd[i].fd, buffer);
+                    }
+                }
             }
-     }
+        }
     }
-
-        //clean up client socket
-
-    }
-
-    //clean up server socket
-}
     return 0;
-
 }
