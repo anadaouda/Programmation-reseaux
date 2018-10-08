@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
+#include <time.h>
 
 #define MAX_BUFFER_SIZE 100
 
@@ -38,10 +39,14 @@ int do_socket() {
 }
 
 void do_connect(int sock, struct sockaddr * sockServerAddr) {
+    printf("Connecting to server...");
+    fflush(stdout);
     if (connect(sock, sockServerAddr, sizeof(struct sockaddr_in)) == -1) {
-        perror("Connect");
+        perror("\nConnect");
         exit(EXIT_FAILURE);
     }
+    printf("done !\n\n");
+    fflush(stdout);
 }
 
 //get user input

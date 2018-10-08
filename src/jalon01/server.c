@@ -8,9 +8,19 @@
 #include <arpa/inet.h>
 #include <limits.h>
 #include <poll.h>
+#include <time.h>
 
 #define MAX_BUFFER_SIZE 100
-#define MAX_FD 20
+#define MAX_FD 1
+#define MAX_USERNAME 50
+
+struct userInfo {
+    int loggedIn;
+    char * username;
+    char * conTime;
+    char * IP;
+    int port;
+};
 
 // creates the listening socket
 int do_socket() {
@@ -149,6 +159,41 @@ int nbOpenFd(struct pollfd structPollFd[]) {
     return openFd;
 }
 
+int searchByUsername (char * username, struct userInfo users[]) {
+    int i, isThere;
+
+    while(strcmp(users[i].username, username)&&i<MAX_FD) {
+        i++;
+    }
+    return i;
+}
+
+void whois (char * username, int rdwrSock, struct userInfo users[]) {
+    int i = searchByUsername(username, users);
+    if (i < MAX_FD) {
+        char * sentence = malloc(200*sizeof(char)); //changer le truc !!!!
+        sprintf(sentence, "%s connected since %s with IP address %s and port number %i\n", users[i].username,users[i].conTime, users[i].IP, users[i].port);
+        do_send(rdwrSock, sentence);
+    } else {
+        do_send(rdwrSock, "The user does not exist or is not connceted");
+    }
+}
+
+void who (int rdwrSock, struct userInfo users[]) {
+    int i;
+    char * sentence = malloc(200*sizeof(char));
+    strcat(sentence, "Online users are : ");
+    for (i = 0; i < MAX_FD; i++) {
+        if(users[i].port != 0) {
+            strcat(sentence, "\n\t- ");
+            strcat(sentence, users[i].username);
+        }
+    }
+    strcat(sentence, "\n");
+    do_send(rdwrSock, sentence);
+}
+
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr,"Veuillez indiquer un numero de port\n\n");
@@ -175,6 +220,9 @@ int main(int argc, char** argv) {
     structPollFd[0].fd = sockServer;
     structPollFd[0].events = POLLIN;
 
+    struct userInfo users[MAX_FD];
+    memset(users, '\0', sizeof(struct userInfo)*MAX_FD);
+
     int rdwrSock;
     int i;
     int resPoll;
@@ -199,7 +247,7 @@ int main(int argc, char** argv) {
                 i = spacePollFd(structPollFd);
                 structPollFd[i].fd = rdwrSock;
                 structPollFd[i].events = POLLIN;
-                do_send(structPollFd[i].fd, "connecte");
+                do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>");
 
             }
         }
@@ -207,10 +255,12 @@ int main(int argc, char** argv) {
             //goes through the pollfd table to send and receive data
             for (i = 1; i < MAX_FD + 1; i++) {
                 if (structPollFd[i].revents == POLLIN) {
+                    // si la personne est connecté
                     do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                     if (structPollFd[i].fd != 0) {
                         do_send(structPollFd[i].fd, buffer);
                     }
+                    //sinon faut quelle se conncte
                 }
             }
         }
