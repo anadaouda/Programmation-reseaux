@@ -11,7 +11,7 @@
 #include <time.h>
 
 #define MAX_BUFFER_SIZE 100
-#define MAX_FD 1
+#define MAX_FD 2
 #define MAX_USERNAME 50
 
 struct userInfo {
@@ -108,61 +108,11 @@ void closeFd (int rdwrSock, struct pollfd structPollFd[]) {
 
 }
 
-void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[]) {
-    memset(buffer, '\0', strlen(buffer));
-
-    int strReceived, strSizeToReceive;
-    do {
-        strReceived = recv(rdwrSock, &strSizeToReceive, sizeof(int), 0);
-        if (strReceived == -1) {
-            perror("Receive");
-            exit(EXIT_FAILURE);
-        }
-    } while (strReceived != sizeof(int));
-
-    do {
-        strReceived = recv(rdwrSock, buffer, SSIZE_MAX, 0);
-        if (strReceived == -1) {
-            perror("Receive");
-            exit(EXIT_FAILURE);
-        }
-    } while (strReceived != strSizeToReceive);
-
-    if (!strcmp(buffer,"/quit\n")) {
-        do_send(rdwrSock,"You will be terminated");
-        closeFd(rdwrSock, structPollFd);
-        close(rdwrSock);
-    }
-    printf("[%i] : %s\n",rdwrSock, buffer);
-}
-
-// returns the index of an availabla space in the pollfd table
-int spacePollFd(struct pollfd structPollFd[]) {
-    int i = 1;
-
-    while ((i < MAX_FD) && (structPollFd[i].events == POLLIN)) {
-        i++;
-    }
-    return i;
-}
-
-// returns the nuber of active fds in the pollfd table
-int nbOpenFd(struct pollfd structPollFd[]) {
-    int i;
-    int openFd = 0;
-
-    for (i = 1; i < MAX_FD + 1; i++) {
-        if (structPollFd[i].events == POLLIN) {
-            openFd++;
-        }
-    }
-    return openFd;
-}
-
 int searchByUsername (char * username, struct userInfo users[]) {
     int i, isThere;
-
-    while(strcmp(users[i].username, username)&&i<MAX_FD) {
+    printf("%s\n\n", users[2].username);
+    fflush(stdout);
+    while(strcmp(users[i].username, username)&&(i<MAX_FD)) {
         i++;
     }
     return i;
@@ -193,6 +143,77 @@ void who (int rdwrSock, struct userInfo users[]) {
     do_send(rdwrSock, sentence);
 }
 
+void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[], struct userInfo users[]) {
+    memset(buffer, '\0', strlen(buffer));
+
+    int strReceived, strSizeToReceive;
+    do {
+        strReceived = recv(rdwrSock, &strSizeToReceive, sizeof(int), 0);
+        if (strReceived == -1) {
+            perror("Receive");
+            exit(EXIT_FAILURE);
+        }
+    } while (strReceived != sizeof(int));
+
+    do {
+        strReceived = recv(rdwrSock, buffer, SSIZE_MAX, 0);
+        if (strReceived == -1) {
+            perror("Receive");
+            exit(EXIT_FAILURE);
+        }
+    } while (strReceived != strSizeToReceive);
+
+        if (!strcmp(buffer,"/quit\n")) {
+            do_send(rdwrSock,"You will be terminated");
+            closeFd(rdwrSock, structPollFd);
+            close(rdwrSock);
+        } else if (!strncmp(buffer, "/whois ",7)) {
+            char * username = malloc(MAX_USERNAME);
+            sscanf(buffer, "/whois %s", username);
+            whois(username, rdwrSock, users);
+        }
+
+    printf("[%i] : %s\n",rdwrSock, buffer);
+}
+
+// returns the index of an availabla space in the pollfd table
+int spacePollFd(struct pollfd structPollFd[]) {
+    int i = 1;
+
+    while ((i < MAX_FD) && (structPollFd[i].events == POLLIN)) {
+        i++;
+    }
+    return i;
+}
+
+// returns the nuber of active fds in the pollfd table
+int nbOpenFd(struct pollfd structPollFd[]) {
+    int i;
+    int openFd = 0;
+
+    for (i = 1; i < MAX_FD + 1; i++) {
+        if (structPollFd[i].events == POLLIN) {
+            openFd++;
+        }
+    }
+    return openFd;
+}
+
+void loggedIn (char * buffer, struct userInfo * user, int rdwrSock) {
+    char * res = malloc(MAX_BUFFER_SIZE*sizeof(char));
+    char * username = malloc(MAX_USERNAME*sizeof(char));
+    if (!strncmp(buffer, "/nick ", 6)) {
+        sscanf(buffer, "/nick %s", username);
+        strcpy(user->username, username);
+        user->loggedIn = 1;
+        sprintf(buffer, "Welcome on the chat %s", username);
+        do_send(rdwrSock, buffer);
+    } else {
+        buffer = "Please logon with /nick <your pseudo>\n";
+        do_send(rdwrSock, buffer);
+    }
+}
+
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -221,7 +242,12 @@ int main(int argc, char** argv) {
     structPollFd[0].events = POLLIN;
 
     struct userInfo users[MAX_FD];
-    memset(users, '\0', sizeof(struct userInfo)*MAX_FD);
+    int j;
+    for (j = 0; j < 10; j++) {
+        users[j].username = malloc(MAX_USERNAME);
+    }
+    //memset(users, '\0', sizeof(struct userInfo)*MAX_FD);
+
 
     int rdwrSock;
     int i;
@@ -247,6 +273,8 @@ int main(int argc, char** argv) {
                 i = spacePollFd(structPollFd);
                 structPollFd[i].fd = rdwrSock;
                 structPollFd[i].events = POLLIN;
+                users[i-1].loggedIn = -1;
+                users[i-1].port = 22;
                 do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>");
 
             }
@@ -255,15 +283,18 @@ int main(int argc, char** argv) {
             //goes through the pollfd table to send and receive data
             for (i = 1; i < MAX_FD + 1; i++) {
                 if (structPollFd[i].revents == POLLIN) {
-                    // si la personne est connecté
-                    do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
-                    if (structPollFd[i].fd != 0) {
-                        do_send(structPollFd[i].fd, buffer);
+                    if (users[i-1].loggedIn == 1) {
+                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd, users);
+                        if (structPollFd[i].fd != 0) {
+                            do_send(structPollFd[i].fd, buffer);
+                        }
+                    } else if (users[i-1].loggedIn==-1) {
+                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd, users);
+                        loggedIn(buffer, &users[i-1], structPollFd[i].fd);
                     }
-                    //sinon faut quelle se conncte
                 }
-            }
         }
     }
+}
     return 0;
 }
