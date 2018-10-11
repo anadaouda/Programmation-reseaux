@@ -116,6 +116,12 @@ void closeFd (int rdwrSock, struct pollfd structPollFd[]) {
 
 }
 
+void deleteUser(struct userInfo * user) {
+    memset(user->username, '\0', MAX_USERNAME);
+    user->port = 0;
+    user->loggedIn = -1;
+}
+
 int searchByUsername (char * username, struct userInfo users[]) {
     int i=0;
 
@@ -146,12 +152,6 @@ void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd struc
         }
     } while (strReceived != strSizeToReceive);
 
-        if (!strcmp(buffer,"/quit\n")) {
-            do_send(rdwrSock,"You will be terminated");
-            closeFd(rdwrSock, structPollFd);
-            close(rdwrSock);
-        }
-
     printf("[%i] : %s\n",rdwrSock, buffer);
 }
 
@@ -178,7 +178,7 @@ int nbOpenFd(struct pollfd structPollFd[]) {
     return openFd;
 }
 
-void whois (char * buffer, char * username, int rdwrSock, struct userInfo users[]) {
+void whois (char * buffer, char * username, struct userInfo users[]) {
     int i = searchByUsername(username, users);
     printf("i=%i\n", i);
     if (i < MAX_FD) {
@@ -189,7 +189,7 @@ void whois (char * buffer, char * username, int rdwrSock, struct userInfo users[
     }
 }
 
-void who (char * buffer, int rdwrSock, struct userInfo users[]) {
+void who (char * buffer, struct userInfo users[]) {
     int i;
     char * sentence = malloc(200*sizeof(char));
     strcat(sentence, "Online users are : ");
@@ -203,15 +203,30 @@ void who (char * buffer, int rdwrSock, struct userInfo users[]) {
     sprintf(buffer, "%s", sentence);
 }
 
+void nick(char * buffer, struct userInfo users[], char * username, int userIndex) {
+    int i = searchByUsername(username, users);
+    if (i >= MAX_FD) {
+        strcpy(users[userIndex].username, username);
+        sprintf(buffer, "Your new username is %s. Welcome back !\n", users[userIndex].username);
+    } else {
+        sprintf(buffer, "%s", "The username is already taken.\n");
+    }
+}
 
 void loggedIn (char * buffer, struct userInfo users[], int rdwrSock, int i) {
     char * username = malloc(MAX_USERNAME*sizeof(char));
     if (!strncmp(buffer, "/nick ", 6)) {
         sscanf(buffer, "/nick %s", username);
-        strcpy(users[i].username, username);
-        users[i].loggedIn = 1;
-        sprintf(buffer, "Welcome on the chat %s", username);
-        do_send(rdwrSock, buffer);
+        if (searchByUsername(username, users) >= MAX_FD) {
+            strcpy(users[i].username, username);
+            users[i].loggedIn = 1;
+            sprintf(buffer, "Welcome on the chat %s", username);
+            do_send(rdwrSock, buffer);
+        }
+        else {
+            buffer = "This user is already connected\n";
+            do_send(rdwrSock, buffer);
+        }
     } else {
         buffer = "Please logon with /nick <your pseudo>\n";
         do_send(rdwrSock, buffer);
@@ -293,10 +308,21 @@ int main(int argc, char** argv) {
                         if (!strncmp(buffer, "/whois ", 7)) {
                             char * username = malloc(MAX_USERNAME);
                             sscanf(buffer, "/whois %s", username);
-                            whois(buffer, username, structPollFd[i].fd, users);
+                            whois(buffer, username, users);
                         }
-                        if (!strncmp(buffer, "/who\n", 4)) {
-                            who(buffer, structPollFd[i].fd, users);
+                        else if (!strncmp(buffer, "/who\n", 4)) {
+                            who(buffer, users);
+                        }
+                        else if (!strncmp(buffer, "/nick ", 6)) {
+                            char * username = malloc(MAX_USERNAME);
+                            sscanf(buffer, "/nick %s", username);
+                            nick(buffer, users, username, i-1);
+                        }
+                        else if (!strcmp(buffer, "/quit\n")) {
+                            do_send(structPollFd[i].fd ,"You will be terminated");
+                            closeFd(structPollFd[i].fd , structPollFd);
+                            deleteUser(&users[i-1]);
+                            close(structPollFd[i].fd);
                         }
                         if (structPollFd[i].fd != 0) {
                             do_send(structPollFd[i].fd, buffer);
