@@ -9,26 +9,53 @@
 #include <limits.h>
 #include <poll.h>
 #include <time.h>
+#include <netdb.h>
+
 
 #define MAX_BUFFER_SIZE 100
 #define MAX_FD 2
 #define MAX_USERNAME 50
 
 struct userInfo {
+    //int index
     int loggedIn;
     char * username;
     char * conTime;
     char * IP;
     int port;
+    //struct userInfo * next
 };
 
-void set_connexion(struct userInfo user, int state){
-    user.loggedIn=state;
+/*
+void newUser(struct userInfo * users) {
+    struct userInfo * current = users;
+    struct userInfo * newUser = malloc(sizeof(struct userInfo));
+    while(current->next != NULL) {
+        current = current->next;
+    }
+    current->next = newUser;
+    newUser->next = NULL;
 }
 
-void set_username(struct userInfo user, char * name){
-    user.username=name;
+struct userInfo * searchByUsername(struct userInfo * users, username) {
+    struct userInfo * current = users;
+    while((current != NULL)&&(strcmp(current->username, username))) {
+        current = current->next;
+    }
+    return current;
 }
+
+
+void deleteUser(int index, struct userInfo * users) {
+    struct userInfo * current = users;
+    while((current != NULL)&&(current->index == index)) {
+        current = current->next;
+    }
+    if (current == NULL) {
+        return;
+    }
+}
+*/
 
 // creates the listening socket
 int do_socket() {
@@ -105,17 +132,6 @@ void do_send(int rdwrSock, char * buffer) {
     } while (strSent != strlen(buffer));
 }
 
-void closeFd (int rdwrSock, struct pollfd structPollFd[]) {
-    int i = 1;
-
-    while ((i < MAX_FD) && (structPollFd[i].fd != rdwrSock)) {
-        i++;
-    }
-
-    memset(&structPollFd[i], '\0', sizeof(struct pollfd));
-
-}
-
 void deleteUser(struct userInfo * user) {
     memset(user->username, '\0', MAX_USERNAME);
     user->port = 0;
@@ -180,9 +196,8 @@ int nbOpenFd(struct pollfd structPollFd[]) {
 
 void whois (char * buffer, char * username, struct userInfo users[]) {
     int i = searchByUsername(username, users);
-    printf("i=%i\n", i);
     if (i < MAX_FD) {
-        sprintf(buffer, "%s connected since yesterday\n", users[i].username);
+        sprintf(buffer, "%s connected since 2014/09/29@19:23 with IP address %s and port number %i\n", users[i].username, users[i].IP, users[i].port);
 
     } else {
         sprintf(buffer, "%s", "The user does not exist or is not connceted\n");
@@ -233,6 +248,19 @@ void loggedIn (char * buffer, struct userInfo users[], int rdwrSock, int i) {
     }
 }
 
+void getPortAndAddr(const char* address, const char* port) {
+    struct addrinfo * res = malloc(sizeof(struct addrinfo **));
+    int status;
+    struct addrinfo hints;
+
+    memset(&hints,0,sizeof(hints));
+
+    hints.ai_family=AF_INET;
+    hints.ai_socktype=SOCK_STREAM;
+
+    status = getaddrinfo(address,port,&hints,&res);
+    freeaddrinfo(res);
+}
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -264,6 +292,7 @@ int main(int argc, char** argv) {
     int j;
     for (j = 0; j < 10; j++) {
         users[j].username = malloc(MAX_USERNAME);
+        users[j].IP = malloc(16);
         users[j].port = 0;
     }
     //memset(users, '\0', sizeof(struct userInfo)*MAX_FD);
@@ -291,10 +320,14 @@ int main(int argc, char** argv) {
                 //accept connection from client
                 rdwrSock = do_accept(sockServer, sockAddr);
                 i = spacePollFd(structPollFd);
+                //do receive ip + port
                 structPollFd[i].fd = rdwrSock;
+                printf("rdwrSock = %i\n", rdwrSock);
+                fflush(stdout);
                 structPollFd[i].events = POLLIN;
                 users[i-1].loggedIn = -1;
-                users[i-1].port = 22;
+                users[i-1].port = sockAddr.sin_port;
+                strcpy(users[i-1].IP, inet_ntoa(sockAddr.sin_addr));
                 do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>");
 
             }
@@ -320,15 +353,23 @@ int main(int argc, char** argv) {
                         }
                         else if (!strcmp(buffer, "/quit\n")) {
                             do_send(structPollFd[i].fd ,"You will be terminated");
-                            closeFd(structPollFd[i].fd , structPollFd);
-                            deleteUser(&users[i-1]);
                             close(structPollFd[i].fd);
+                            memset(&structPollFd[i], '\0', sizeof(struct pollfd));
+                            deleteUser(&users[i-1]);
+                            break;
                         }
                         if (structPollFd[i].fd != 0) {
                             do_send(structPollFd[i].fd, buffer);
                         }
                     } else if (users[i-1].loggedIn==-1) {
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd, users);
+                        if (!strcmp(buffer, "/quit\n")) {
+                            do_send(structPollFd[i].fd ,"You will be terminated");
+                            close(structPollFd[i].fd);
+                            memset(&structPollFd[i], '\0', sizeof(struct pollfd));
+                            memset(&users[i-1], '\0', sizeof(struct userInfo));
+                            break;
+                        }
                         loggedIn(buffer, users, structPollFd[i].fd, i-1);
                     }
                 }

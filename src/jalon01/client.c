@@ -109,15 +109,15 @@ void handle_client_message(int sock, char * buffer) {
         free(buffer);
         exit(1);
     }
-    if (!strcmp(buffer,"You will be terminated")) {
+    else if (!strcmp(buffer,"You will be terminated")) {
         close(sock);
         free(buffer);
         printf("Disconnected\n");
         fflush(stdout);
         exit(1);
     }
-
 }
+
 
 int main(int argc,char** argv) {
 
@@ -137,7 +137,11 @@ int main(int argc,char** argv) {
     //connect to remote socket
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
 
+    // get ip + port avec get sock name
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
+
+
+
 
     while(1) {
         //send message to the server
