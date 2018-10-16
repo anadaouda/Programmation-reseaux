@@ -13,49 +13,70 @@
 
 
 #define MAX_BUFFER_SIZE 100
-#define MAX_FD 2
+#define MAX_FD 20
 #define MAX_USERNAME 50
 
 struct userInfo {
-    //int index
+    int index;
     int loggedIn;
     char * username;
-    char * conTime;
+    struct tm * conTime;
     char * IP;
     int port;
-    //struct userInfo * next
+    struct userInfo * next;
 };
 
-/*
-void newUser(struct userInfo * users) {
+void newUser(struct userInfo * users, int index, char * IP, int port) {
     struct userInfo * current = users;
     struct userInfo * newUser = malloc(sizeof(struct userInfo));
+
     while(current->next != NULL) {
         current = current->next;
     }
     current->next = newUser;
     newUser->next = NULL;
+    newUser->index = index;
+    newUser->loggedIn = -1;
+    newUser->port = port;
+    newUser->username = malloc(MAX_USERNAME);
+    newUser->conTime = malloc(sizeof(struct tm));
+    newUser->IP = malloc(100);
+    strcpy(newUser->IP, IP);
 }
 
-struct userInfo * searchByUsername(struct userInfo * users, username) {
-    struct userInfo * current = users;
+struct userInfo * searchByUsername(struct userInfo * users, char * username) {
+    struct userInfo * current = users->next;
+
     while((current != NULL)&&(strcmp(current->username, username))) {
         current = current->next;
     }
+
     return current;
 }
 
+struct userInfo * searchByIndex(struct userInfo * users, int index) {
+    struct userInfo * current = users->next;
+
+    while((current != NULL)&&(current->index != index)) {
+        current = current->next;
+    }
+
+    return current;
+}
 
 void deleteUser(int index, struct userInfo * users) {
     struct userInfo * current = users;
-    while((current != NULL)&&(current->index == index)) {
+    struct userInfo * toDelete = malloc(sizeof(struct userInfo));
+
+    while((current->next != NULL)&&(current->next->index != index)) {
         current = current->next;
     }
-    if (current == NULL) {
-        return;
+    if (current != NULL) {
+        toDelete = current->next;
+        current->next = current->next->next;
+        free(toDelete);
     }
 }
-*/
 
 // creates the listening socket
 int do_socket() {
@@ -132,22 +153,9 @@ void do_send(int rdwrSock, char * buffer) {
     } while (strSent != strlen(buffer));
 }
 
-void deleteUser(struct userInfo * user) {
-    memset(user->username, '\0', MAX_USERNAME);
-    user->port = 0;
-    user->loggedIn = -1;
-}
 
-int searchByUsername (char * username, struct userInfo users[]) {
-    int i=0;
 
-    while((i<MAX_FD)&&strcmp(users[i].username, username)) {
-        i++;
-    }
-    return i;
-}
-
-void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[], struct userInfo users[]) {
+void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[]) {
     memset(buffer, '\0', strlen(buffer));
 
     int strReceived, strSizeToReceive;
@@ -194,47 +202,53 @@ int nbOpenFd(struct pollfd structPollFd[]) {
     return openFd;
 }
 
-void whois (char * buffer, char * username, struct userInfo users[]) {
-    int i = searchByUsername(username, users);
-    if (i < MAX_FD) {
-        sprintf(buffer, "%s connected since 2014/09/29@19:23 with IP address %s and port number %i\n", users[i].username, users[i].IP, users[i].port);
+void whois (char * buffer, char * username, struct userInfo * users) {
+    struct userInfo * user = searchByUsername(users, username);
+    if (user != NULL) {
+        sprintf(buffer, "%s is connected since %04d-%02d-%02d %02d:%02d:%02d with IP address %s and port number %i\n", user->username,1900+user->conTime->tm_year,user->conTime->tm_mon+1,user->conTime->tm_mday,user->conTime->tm_hour,user->conTime->tm_min,user->conTime->tm_sec, user->IP, user->port);
 
     } else {
-        sprintf(buffer, "%s", "The user does not exist or is not connceted\n");
+        sprintf(buffer, "%s", "The user does not exist or is not connected\n");
     }
 }
 
-void who (char * buffer, struct userInfo users[]) {
-    int i;
+void who (char * buffer, struct userInfo * users) {
     char * sentence = malloc(200*sizeof(char));
+    struct userInfo * current = users->next;
+
     strcat(sentence, "Online users are : ");
-    for (i = 0; i < MAX_FD; i++) {
-        if(users[i].port != 0) {
+    while(current != NULL) {
             strcat(sentence, "\n\t- ");
-            strcat(sentence, users[i].username);
-        }
+            strcat(sentence, current->username);
+        current = current->next;
     }
     strcat(sentence, "\n");
     sprintf(buffer, "%s", sentence);
 }
 
-void nick(char * buffer, struct userInfo users[], char * username, int userIndex) {
-    int i = searchByUsername(username, users);
-    if (i >= MAX_FD) {
-        strcpy(users[userIndex].username, username);
-        sprintf(buffer, "Your new username is %s. Welcome back !\n", users[userIndex].username);
+void nick(char * buffer, struct userInfo * users, char * username, struct userInfo * currentUser) {
+    struct userInfo * available = searchByUsername(users, username);
+
+    if (available == NULL) {
+        strcpy(currentUser->username, username);
+        sprintf(buffer, "Your new username is %s. Welcome back !\n", currentUser->username);
     } else {
         sprintf(buffer, "%s", "The username is already taken.\n");
     }
 }
 
-void loggedIn (char * buffer, struct userInfo users[], int rdwrSock, int i) {
+void loggedIn (char * buffer, struct userInfo * users, int rdwrSock, struct userInfo * currentUser) {
     char * username = malloc(MAX_USERNAME*sizeof(char));
+    struct userInfo * available = malloc(sizeof(struct userInfo));
+    time_t seconds = time(NULL);
+
     if (!strncmp(buffer, "/nick ", 6)) {
         sscanf(buffer, "/nick %s", username);
-        if (searchByUsername(username, users) >= MAX_FD) {
-            strcpy(users[i].username, username);
-            users[i].loggedIn = 1;
+         available = searchByUsername(users, username);
+        if (available == NULL) {
+            strcpy(currentUser->username, username);
+            currentUser->loggedIn = 1;
+            currentUser->conTime = localtime(&seconds);
             sprintf(buffer, "Welcome on the chat %s", username);
             do_send(rdwrSock, buffer);
         }
@@ -248,19 +262,6 @@ void loggedIn (char * buffer, struct userInfo users[], int rdwrSock, int i) {
     }
 }
 
-void getPortAndAddr(const char* address, const char* port) {
-    struct addrinfo * res = malloc(sizeof(struct addrinfo **));
-    int status;
-    struct addrinfo hints;
-
-    memset(&hints,0,sizeof(hints));
-
-    hints.ai_family=AF_INET;
-    hints.ai_socktype=SOCK_STREAM;
-
-    status = getaddrinfo(address,port,&hints,&res);
-    freeaddrinfo(res);
-}
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -288,20 +289,14 @@ int main(int argc, char** argv) {
     structPollFd[0].fd = sockServer;
     structPollFd[0].events = POLLIN;
 
-    struct userInfo users[MAX_FD];
-    int j;
-    for (j = 0; j < 10; j++) {
-        users[j].username = malloc(MAX_USERNAME);
-        users[j].IP = malloc(16);
-        users[j].port = 0;
-    }
-    //memset(users, '\0', sizeof(struct userInfo)*MAX_FD);
-
+    struct userInfo * users = malloc(sizeof(struct userInfo));
+    users->next = NULL;
 
     int rdwrSock;
     int i;
     int resPoll;
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
+    struct userInfo * currentUser = malloc(sizeof(struct userInfo));
 
     while(1) {
         resPoll = poll(structPollFd, MAX_FD + 1, -1);
@@ -325,9 +320,7 @@ int main(int argc, char** argv) {
                 printf("rdwrSock = %i\n", rdwrSock);
                 fflush(stdout);
                 structPollFd[i].events = POLLIN;
-                users[i-1].loggedIn = -1;
-                users[i-1].port = sockAddr.sin_port;
-                strcpy(users[i-1].IP, inet_ntoa(sockAddr.sin_addr));
+                newUser(users, i, inet_ntoa(sockAddr.sin_addr), sockAddr.sin_port);
                 do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>");
 
             }
@@ -336,8 +329,9 @@ int main(int argc, char** argv) {
             //goes through the pollfd table to send and receive data
             for (i = 1; i < MAX_FD + 1; i++) {
                 if (structPollFd[i].revents == POLLIN) {
-                    if (users[i-1].loggedIn == 1) {
-                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd, users);
+                    currentUser = searchByIndex(users, i);
+                    if (currentUser->loggedIn == 1) {
+                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strncmp(buffer, "/whois ", 7)) {
                             char * username = malloc(MAX_USERNAME);
                             sscanf(buffer, "/whois %s", username);
@@ -349,28 +343,28 @@ int main(int argc, char** argv) {
                         else if (!strncmp(buffer, "/nick ", 6)) {
                             char * username = malloc(MAX_USERNAME);
                             sscanf(buffer, "/nick %s", username);
-                            nick(buffer, users, username, i-1);
+                            nick(buffer, users, username, currentUser);
                         }
                         else if (!strcmp(buffer, "/quit\n")) {
                             do_send(structPollFd[i].fd ,"You will be terminated");
                             close(structPollFd[i].fd);
                             memset(&structPollFd[i], '\0', sizeof(struct pollfd));
-                            deleteUser(&users[i-1]);
+                            deleteUser(i, users);
                             break;
                         }
                         if (structPollFd[i].fd != 0) {
                             do_send(structPollFd[i].fd, buffer);
                         }
-                    } else if (users[i-1].loggedIn==-1) {
-                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd, users);
+                    } else if (currentUser->loggedIn==-1) {
+                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strcmp(buffer, "/quit\n")) {
                             do_send(structPollFd[i].fd ,"You will be terminated");
                             close(structPollFd[i].fd);
                             memset(&structPollFd[i], '\0', sizeof(struct pollfd));
-                            memset(&users[i-1], '\0', sizeof(struct userInfo));
+                            deleteUser(i, users);
                             break;
                         }
-                        loggedIn(buffer, users, structPollFd[i].fd, i-1);
+                        loggedIn(buffer, users, structPollFd[i].fd, currentUser);
                     }
                 }
         }
