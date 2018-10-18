@@ -75,7 +75,7 @@ CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT:BOOL=FALSE
 
 //Additional command line arguments when Eclipse invokes make.
 // Enter e.g. -j<some_number> to get parallel builds
-CMAKE_ECLIPSE_MAKE_ARGUMENTS:STRING=
+CMAKE_ECLIPSE_MAKE_ARGUMENTS:STRING=-j2
 
 //The version of Eclipse. If Eclipse has not been found, 3.6 (Helios)
 // is assumed.
@@ -191,16 +191,10 @@ ProcessorCount_cmd_getconf:FILEPATH=/usr/bin/getconf
 ProcessorCount_cmd_sysctl:FILEPATH=/sbin/sysctl
 
 //Value Computed by CMake
-RE216_BINARY_DIR:STATIC=/home/ana/Documents/S7/Programmation réseaux/build
+RE216_BINARY_DIR:STATIC=/home/ana/Documents/S7/Programmation réseaux/build/header
 
 //Value Computed by CMake
-RE216_JALON01_BINARY_DIR:STATIC=/home/ana/Documents/S7/Programmation réseaux/build/jalon01
-
-//Value Computed by CMake
-RE216_JALON01_SOURCE_DIR:STATIC=/home/ana/Documents/S7/Programmation réseaux/src/jalon01
-
-//Value Computed by CMake
-RE216_SOURCE_DIR:STATIC=/home/ana/Documents/S7/Programmation réseaux/src
+RE216_SOURCE_DIR:STATIC=/home/ana/Documents/S7/Programmation réseaux/src/header
 
 
 ########################

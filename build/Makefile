@@ -111,30 +111,111 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named RE216_JALON01_SERVER
+# Target rules for targets named RE216_SERVER
 
 # Build rule for target.
-RE216_JALON01_SERVER: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 RE216_JALON01_SERVER
-.PHONY : RE216_JALON01_SERVER
+RE216_SERVER: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 RE216_SERVER
+.PHONY : RE216_SERVER
 
 # fast build rule for target.
-RE216_JALON01_SERVER/fast:
-	$(MAKE) -f jalon01/CMakeFiles/RE216_JALON01_SERVER.dir/build.make jalon01/CMakeFiles/RE216_JALON01_SERVER.dir/build
-.PHONY : RE216_JALON01_SERVER/fast
+RE216_SERVER/fast:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/build
+.PHONY : RE216_SERVER/fast
 
 #=============================================================================
-# Target rules for targets named RE216_JALON01_CLIENT
+# Target rules for targets named RE216_CLIENT
 
 # Build rule for target.
-RE216_JALON01_CLIENT: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 RE216_JALON01_CLIENT
-.PHONY : RE216_JALON01_CLIENT
+RE216_CLIENT: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 RE216_CLIENT
+.PHONY : RE216_CLIENT
 
 # fast build rule for target.
-RE216_JALON01_CLIENT/fast:
-	$(MAKE) -f jalon01/CMakeFiles/RE216_JALON01_CLIENT.dir/build.make jalon01/CMakeFiles/RE216_JALON01_CLIENT.dir/build
-.PHONY : RE216_JALON01_CLIENT/fast
+RE216_CLIENT/fast:
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/build
+.PHONY : RE216_CLIENT/fast
+
+client.o: client.c.o
+
+.PHONY : client.o
+
+# target to build an object file
+client.c.o:
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/client.c.o
+.PHONY : client.c.o
+
+client.i: client.c.i
+
+.PHONY : client.i
+
+# target to preprocess a source file
+client.c.i:
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/client.c.i
+.PHONY : client.c.i
+
+client.s: client.c.s
+
+.PHONY : client.s
+
+# target to generate assembly for a file
+client.c.s:
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/client.c.s
+.PHONY : client.c.s
+
+server.o: server.c.o
+
+.PHONY : server.o
+
+# target to build an object file
+server.c.o:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/server.c.o
+.PHONY : server.c.o
+
+server.i: server.c.i
+
+.PHONY : server.i
+
+# target to preprocess a source file
+server.c.i:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/server.c.i
+.PHONY : server.c.i
+
+server.s: server.c.s
+
+.PHONY : server.s
+
+# target to generate assembly for a file
+server.c.s:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/server.c.s
+.PHONY : server.c.s
+
+users.o: users.c.o
+
+.PHONY : users.o
+
+# target to build an object file
+users.c.o:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/users.c.o
+.PHONY : users.c.o
+
+users.i: users.c.i
+
+.PHONY : users.i
+
+# target to preprocess a source file
+users.c.i:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/users.c.i
+.PHONY : users.c.i
+
+users.s: users.c.s
+
+.PHONY : users.s
+
+# target to generate assembly for a file
+users.c.s:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/users.c.s
+.PHONY : users.c.s
 
 # Help Target
 help:
@@ -144,8 +225,17 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... RE216_JALON01_SERVER"
-	@echo "... RE216_JALON01_CLIENT"
+	@echo "... RE216_SERVER"
+	@echo "... RE216_CLIENT"
+	@echo "... client.o"
+	@echo "... client.i"
+	@echo "... client.s"
+	@echo "... server.o"
+	@echo "... server.i"
+	@echo "... server.s"
+	@echo "... users.o"
+	@echo "... users.i"
+	@echo "... users.s"
 .PHONY : help
 
 
