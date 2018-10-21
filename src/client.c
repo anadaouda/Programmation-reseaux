@@ -10,7 +10,7 @@
 #include <limits.h>
 #include <time.h>
 
-#define MAX_BUFFER_SIZE 100
+#include "header/constant.h"
 
 struct sockaddr_in get_addr_info(char** argv) {
     struct sockaddr_in sockServerAddr;
