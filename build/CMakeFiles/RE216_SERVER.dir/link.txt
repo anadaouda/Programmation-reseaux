@@ -1,1 +1,1 @@
-/usr/bin/cc  -g   CMakeFiles/RE216_SERVER.dir/users.c.o CMakeFiles/RE216_SERVER.dir/server.c.o  -o RE216_SERVER -rdynamic 
+/usr/bin/cc  -g   CMakeFiles/RE216_SERVER.dir/users.c.o CMakeFiles/RE216_SERVER.dir/server.c.o  -o RE216_SERVER -rdynamic -lpthread 

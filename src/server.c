@@ -70,7 +70,7 @@ int do_accept(int sockServer, struct sockaddr_in sockAddr) {
 
 void do_send(int rdwrSock, char * buffer) {
     int strSent;
-    int messageLen = strlen(buffer);
+    int messageLen = MAX_BUFFER_SIZE;
 
     do {
         strSent = send(rdwrSock,&messageLen,sizeof(int),0);
@@ -81,18 +81,18 @@ void do_send(int rdwrSock, char * buffer) {
     } while (strSent != sizeof(int));
 
     do {
-        strSent = send(rdwrSock,buffer,strlen(buffer),0);
+        strSent = send(rdwrSock,buffer,MAX_BUFFER_SIZE,0);
         if (strSent == -1) {
             perror("Send");
             exit(EXIT_FAILURE);
         }
-    } while (strSent != strlen(buffer));
+    } while (strSent != MAX_BUFFER_SIZE);
 }
 
 
 
 void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[]) {
-    memset(buffer, '\0', strlen(buffer));
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
 
     int strReceived, strSizeToReceive;
 
@@ -140,6 +140,8 @@ int nbOpenFd(struct pollfd structPollFd[]) {
 
 void whois (char * buffer, char * username, struct userInfo * users) {
     struct userInfo * user = searchByUsername(users, username);
+
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
     if (user != NULL) {
         sprintf(buffer, "%s is connected since %04d-%02d-%02d %02d:%02d:%02d with IP address %s and port number %i\n", getUsername(user),getYear(user),getMonth(user),getDay(user),getHour(user),getMinute(user),getSecond(user), getIP(user), getPort(user));
 
@@ -152,19 +154,20 @@ void who (char * buffer, struct userInfo * users) {
     char * sentence = malloc(200*sizeof(char));
     struct userInfo * current = getNext(users);
 
-    strcat(sentence, "Online users are : ");
+    sprintf(sentence, "%s", "Online users are : ");
     while(current != NULL) {
             strcat(sentence, "\n\t- ");
             strcat(sentence, getUsername(current));
         current = getNext(current);
     }
     strcat(sentence, "\n");
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
     sprintf(buffer, "%s", sentence);
 }
 
 void nick(char * buffer, struct userInfo * users, char * username, struct userInfo * currentUser) {
     struct userInfo * available = searchByUsername(users, username);
-
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
     if (available == NULL) {
         strcpy(getUsername(currentUser), username);
         sprintf(buffer, "Your new username is %s. Welcome back !\n", getUsername(currentUser));
@@ -185,19 +188,30 @@ void loggedIn (char * buffer, struct userInfo * users, int rdwrSock, struct user
             strcpy(getUsername(currentUser), username);
             setLoggedIn(currentUser, 1);
             setConTime(currentUser,localtime(&seconds));
+            memset(buffer, '\0', MAX_BUFFER_SIZE);
             sprintf(buffer, "Welcome on the chat %s", username);
             do_send(rdwrSock, buffer);
         }
         else {
+            memset(buffer, '\0', MAX_BUFFER_SIZE);
             buffer = "This user is already connected\n";
             do_send(rdwrSock, buffer);
         }
     } else {
+        memset(buffer, '\0', MAX_BUFFER_SIZE);
         buffer = "Please logon with /nick <your pseudo>\n";
         do_send(rdwrSock, buffer);
     }
 }
 
+void quit(char * buffer, struct pollfd * structPollFd, int i, struct userInfo * users) {
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+    buffer = "You will be terminated\n";
+    do_send(structPollFd->fd ,"You will be terminated");
+    close(structPollFd->fd);
+    memset(structPollFd, '\0', sizeof(struct pollfd));
+    deleteUser(i, users);
+}
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -251,10 +265,7 @@ int main(int argc, char** argv) {
                 //accept connection from client
                 rdwrSock = do_accept(sockServer, sockAddr);
                 i = spacePollFd(structPollFd);
-                //do receive ip + port
                 structPollFd[i].fd = rdwrSock;
-                printf("rdwrSock = %i\n", rdwrSock);
-                fflush(stdout);
                 structPollFd[i].events = POLLIN;
                 newUser(users, i, inet_ntoa(sockAddr.sin_addr), sockAddr.sin_port);
                 do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>");
@@ -273,7 +284,7 @@ int main(int argc, char** argv) {
                             sscanf(buffer, "/whois %s", username);
                             whois(buffer, username, users);
                         }
-                        else if (!strncmp(buffer, "/who\n", 4)) {
+                        else if (!strncmp(buffer, "/who\n", 5)) {
                             who(buffer, users);
                         }
                         else if (!strncmp(buffer, "/nick ", 6)) {
@@ -282,10 +293,7 @@ int main(int argc, char** argv) {
                             nick(buffer, users, username, currentUser);
                         }
                         else if (!strcmp(buffer, "/quit\n")) {
-                            do_send(structPollFd[i].fd ,"You will be terminated");
-                            close(structPollFd[i].fd);
-                            memset(&structPollFd[i], '\0', sizeof(struct pollfd));
-                            deleteUser(i, users);
+                            quit(buffer, &structPollFd[i], i, users);
                             break;
                         }
                         if (structPollFd[i].fd != 0) {
@@ -294,11 +302,7 @@ int main(int argc, char** argv) {
                     } else if (getLoggedIn(currentUser)==-1) {
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strcmp(buffer, "/quit\n")) {
-                            do_send(structPollFd[i].fd ,"You will be terminated");
-                            close(structPollFd[i].fd);
-                            memset(&structPollFd[i], '\0', sizeof(struct pollfd));
-                            deleteUser(i, users);
-                            break;
+                            quit(buffer, &structPollFd[i], i, users);
                         }
                         loggedIn(buffer, users, structPollFd[i].fd, currentUser);
                     }

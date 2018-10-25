@@ -11,7 +11,12 @@
 #include <time.h>
 #include <pthread.h>
 
-#define MAX_BUFFER_SIZE 100
+#include "header/constant.h"
+
+struct args {
+    int sock;
+    char * buffer;
+};
 
 struct sockaddr_in get_addr_info(char** argv) {
     struct sockaddr_in sockServerAddr;
@@ -22,11 +27,6 @@ struct sockaddr_in get_addr_info(char** argv) {
     inet_aton(argv[1], &sockServerAddr.sin_addr);
 
     return sockServerAddr;
-}
-
-struct args {
-    int sock;
-    char * buffer;
 }
 
 int do_socket() {
@@ -59,15 +59,17 @@ void do_connect(int sock, struct sockaddr * sockServerAddr) {
 void message_to_send(char * input) {
     memset(input, '\0', strlen(input));
 
-    printf("Message à envoyer :\n");
     fgets(input,MAX_BUFFER_SIZE*sizeof(char),stdin);
 }
 
 void * do_send(void * args) {
+    struct args arguments = *(struct args *)args;
+    char * buffer = arguments.buffer;
+    int sock = arguments.sock;
+
     while(1) {
         int strSent;
         message_to_send(buffer);
-
         int inputLen = strlen(buffer);
 
         do {
@@ -85,10 +87,15 @@ void * do_send(void * args) {
                 exit(EXIT_FAILURE);
             }
         } while (strSent != strlen(buffer));
+
+        if (!strcmp(buffer, "/quit\n")) {
+            return NULL;
+        }
     }
+    return NULL;
 }
 
-void do_receive(void * args) {
+void do_receive(int sock, char * buffer) {
         int strReceived, strSizeToReceive;
         do {
             strReceived = recv(sock, &strSizeToReceive, sizeof(int), 0);
@@ -108,8 +115,9 @@ void do_receive(void * args) {
 }
 
 void * handle_client_message(void * args) {
-    char * buffer = (char *)args->buffer;
-    int sock = *(int *)args->sock;
+    struct args arguments = *(struct args *)args;
+    char * buffer = arguments.buffer;
+    int sock = arguments.sock;
 
     while(1) {
         do_receive(sock, buffer);
@@ -122,7 +130,7 @@ void * handle_client_message(void * args) {
             free(buffer);
             exit(1);
         }
-        else if (!strcmp(buffer,"You will be terminated")) {
+        else if (!strncmp(buffer,"You will be terminated",22)) {
             close(sock);
             free(buffer);
             printf("Disconnected\n");
@@ -130,6 +138,7 @@ void * handle_client_message(void * args) {
             exit(1);
         }
     }
+    return NULL;
 }
 
 
@@ -162,12 +171,8 @@ int main(int argc,char** argv) {
     pthread_create(&ecoute, NULL, handle_client_message, (void *)&arguments);
     pthread_create(&ecriture, NULL, do_send, (void *)&arguments);
 
-/*
-    while(1) {
-        //send message to the server
-        handle_client_message(sock, buffer);
-        do_send(sock, buffer);
-    }
-    */
+    pthread_join(ecoute, NULL);
+    //phtread_join(ecriture, NULL);
+
     return 0;
 }

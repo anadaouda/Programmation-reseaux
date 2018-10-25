@@ -29,6 +29,8 @@ limits.h
 -
 time.h
 -
+pthread.h
+-
 header/constant.h
 /home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 

@@ -1,1 +1,1 @@
-/usr/bin/cc  -g   CMakeFiles/RE216_CLIENT.dir/client.c.o  -o RE216_CLIENT -rdynamic 
+/usr/bin/cc  -g   CMakeFiles/RE216_CLIENT.dir/client.c.o  -o RE216_CLIENT -rdynamic -lpthread 

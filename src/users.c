@@ -109,7 +109,7 @@ void newUser(struct userInfo * users, int index, char * IP, int port) {
     strcpy(newUser->IP, IP);
 }
 
-void addUser(struct userInfo * user, struct userinfo * users) {
+void addUser(struct userInfo * user, struct userInfo * users) {
     struct userInfo * current = users;
 
     while(current->next != NULL) {
@@ -154,7 +154,7 @@ void deleteUser(int index, struct userInfo * users) {
 }
 
 int nbUsers (struct userInfo * users) {
-    int nbUsers = 0
+    int nbUsers = 0;
     struct userInfo * current = users;
 
     while(current->next != NULL) {
