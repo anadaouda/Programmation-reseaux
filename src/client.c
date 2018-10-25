@@ -9,8 +9,9 @@
 #include <arpa/inet.h>
 #include <limits.h>
 #include <time.h>
+#include <pthread.h>
 
-#include "header/constant.h"
+#define MAX_BUFFER_SIZE 100
 
 struct sockaddr_in get_addr_info(char** argv) {
     struct sockaddr_in sockServerAddr;
@@ -21,6 +22,11 @@ struct sockaddr_in get_addr_info(char** argv) {
     inet_aton(argv[1], &sockServerAddr.sin_addr);
 
     return sockServerAddr;
+}
+
+struct args {
+    int sock;
+    char * buffer;
 }
 
 int do_socket() {
@@ -57,64 +63,72 @@ void message_to_send(char * input) {
     fgets(input,MAX_BUFFER_SIZE*sizeof(char),stdin);
 }
 
-void do_send(int sock, char * buffer) {
-    int strSent;
-    message_to_send(buffer);
-    int inputLen = strlen(buffer);
+void * do_send(void * args) {
+    while(1) {
+        int strSent;
+        message_to_send(buffer);
 
-    do {
-        strSent = send(sock,&inputLen,sizeof(int),0);
-        if (strSent == -1) {
-            perror("Send");
-            exit(EXIT_FAILURE);
-        }
-    } while (strSent != sizeof(int));
+        int inputLen = strlen(buffer);
 
-    do {
-        strSent = send(sock,buffer,strlen(buffer),0);
-        if (strSent == -1) {
-            perror("Send");
-            exit(EXIT_FAILURE);
-        }
-    } while (strSent != strlen(buffer));
-}
+        do {
+            strSent = send(sock,&inputLen,sizeof(int),0);
+            if (strSent == -1) {
+                perror("Send");
+                exit(EXIT_FAILURE);
+            }
+        } while (strSent != sizeof(int));
 
-void do_receive(int sock, char * buffer) {
-    int strReceived, strSizeToReceive;
-    do {
-        strReceived = recv(sock, &strSizeToReceive, sizeof(int), 0);
-        if (strReceived == -1) {
-            perror("Receive");
-            exit(EXIT_FAILURE);
-        }
-    } while (strReceived != sizeof(int));
-
-    do {
-        strReceived = recv(sock, buffer, SSIZE_MAX, 0);
-        if (strReceived == -1) {
-            perror("Receive");
-            exit(EXIT_FAILURE);
-        }
-    } while (strReceived != strSizeToReceive);
-}
-
-void handle_client_message(int sock, char * buffer) {
-    do_receive(sock, buffer);
-    printf("[SERVER] : %s\n\n",buffer);
-    fflush(stdout);
-
-    if (!strcmp(buffer, "/serverOverload")) {
-        printf("Server cannot accept incoming connections anymore. Try again later\n");
-        close(sock);
-        free(buffer);
-        exit(1);
+        do {
+            strSent = send(sock,buffer,strlen(buffer),0);
+            if (strSent == -1) {
+                perror("Send");
+                exit(EXIT_FAILURE);
+            }
+        } while (strSent != strlen(buffer));
     }
-    else if (!strcmp(buffer,"You will be terminated")) {
-        close(sock);
-        free(buffer);
-        printf("Disconnected\n");
+}
+
+void do_receive(void * args) {
+        int strReceived, strSizeToReceive;
+        do {
+            strReceived = recv(sock, &strSizeToReceive, sizeof(int), 0);
+            if (strReceived == -1) {
+                perror("Receive");
+                exit(EXIT_FAILURE);
+            }
+        } while (strReceived != sizeof(int));
+
+        do {
+            strReceived = recv(sock, buffer, SSIZE_MAX, 0);
+            if (strReceived == -1) {
+                perror("Receive");
+                exit(EXIT_FAILURE);
+            }
+        } while (strReceived != strSizeToReceive);
+}
+
+void * handle_client_message(void * args) {
+    char * buffer = (char *)args->buffer;
+    int sock = *(int *)args->sock;
+
+    while(1) {
+        do_receive(sock, buffer);
+        printf("[SERVER] : %s\n\n",buffer);
         fflush(stdout);
-        exit(1);
+
+        if (!strcmp(buffer, "/serverOverload")) {
+            printf("Server cannot accept incoming connections anymore. Try again later\n");
+            close(sock);
+            free(buffer);
+            exit(1);
+        }
+        else if (!strcmp(buffer,"You will be terminated")) {
+            close(sock);
+            free(buffer);
+            printf("Disconnected\n");
+            fflush(stdout);
+            exit(1);
+        }
     }
 }
 
@@ -140,13 +154,20 @@ int main(int argc,char** argv) {
     // get ip + port avec get sock name
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
+    pthread_t ecoute;
+    pthread_t ecriture;
 
+    struct args arguments = {sock, buffer};
 
+    pthread_create(&ecoute, NULL, handle_client_message, (void *)&arguments);
+    pthread_create(&ecriture, NULL, do_send, (void *)&arguments);
 
+/*
     while(1) {
         //send message to the server
         handle_client_message(sock, buffer);
         do_send(sock, buffer);
     }
+    */
     return 0;
 }

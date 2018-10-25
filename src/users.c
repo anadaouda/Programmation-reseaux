@@ -109,6 +109,16 @@ void newUser(struct userInfo * users, int index, char * IP, int port) {
     strcpy(newUser->IP, IP);
 }
 
+void addUser(struct userInfo * user, struct userinfo * users) {
+    struct userInfo * current = users;
+
+    while(current->next != NULL) {
+        current = current->next;
+    }
+    current->next = user;
+    user->next = NULL;
+}
+
 struct userInfo * searchByUsername(struct userInfo * users, char * username) {
     struct userInfo * current = users->next;
 
@@ -141,4 +151,16 @@ void deleteUser(int index, struct userInfo * users) {
         current->next = current->next->next;
         free(toDelete);
     }
+}
+
+int nbUsers (struct userInfo * users) {
+    int nbUsers = 0
+    struct userInfo * current = users;
+
+    while(current->next != NULL) {
+        current = current->next;
+        nbUsers++;
+    }
+
+    return nbUsers;
 }

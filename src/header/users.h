@@ -22,9 +22,12 @@ void setNext(struct userInfo * user, struct userInfo * next);
 
 struct userInfo * getNext(struct userInfo * user);
 struct userInfo * createUser();
+void addUser(struct userInfo * user, struct userinfo * users);
 void newUser(struct userInfo * users, int index, char * IP, int port);
 struct userInfo * searchByUsername(struct userInfo * users, char * username);
 struct userInfo * searchByIndex(struct userInfo * users, int index);
 void deleteUser(int index, struct userInfo * users);
+
+int nbUsers (struct userInfo * users);
 
 #endif /* USERS_H_ */
