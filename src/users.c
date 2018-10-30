@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
+/*
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
-#include <poll.h>
-#include <time.h>
 #include <netdb.h>
+#include <poll.h>
+*/
 
 #include "header/constant.h"
 
@@ -21,74 +24,37 @@ struct userInfo {
     char * IP;
     int port;
     struct userInfo * next;
+    int inChannel;
 };
 
-struct userInfo * createUser() {
+struct userInfo * createUsers() {
     struct userInfo * user = malloc(sizeof(struct userInfo));
     user->next = NULL;
     return user;
-}
-
-char * getUsername(struct userInfo * user) {
-    return user->username;
-}
-
-int getYear(struct userInfo * user) {
-    return 1900+user->conTime->tm_year;
-}
-
-int getMonth(struct userInfo * user) {
-    return 1+user->conTime->tm_mon;
-}
-
-int getDay(struct userInfo * user) {
-    return user->conTime->tm_mday;
-}
-
-int getHour(struct userInfo * user) {
-    return user->conTime->tm_hour;
-}
-
-int getMinute(struct userInfo * user) {
-    return user->conTime->tm_min;
-}
-
-int getSecond(struct userInfo * user) {
-    return user->conTime->tm_sec;
-}
-
-char * getIP(struct userInfo * user) {
-    return user->IP;
-}
-
-int getPort(struct userInfo * user) {
-    return user->port;
-}
-
-int getIndex(struct userInfo * user) {
-    return user->index;
 }
 
 int getLoggedIn(struct userInfo * user) {
     return user->loggedIn;
 }
 
-struct tm * getConTime(struct userInfo * user) {
-    return user->conTime;
+char * getUsername(struct userInfo * user) {
+    return user->username;
 }
 
 struct userInfo * getNext(struct userInfo * user) {
     return user->next;
 }
 
-void setLoggedIn(struct userInfo * user, int status) {
-    user->loggedIn = status;
+int getIndex(struct userInfo * user) {
+    return user->index;
 }
-void setConTime(struct userInfo * user, struct tm * conTime) {
-    user->conTime = conTime;
+
+int isInChannel(struct userInfo * user) {
+    return user->inChannel;
 }
-void setNext(struct userInfo * user, struct userInfo * next) {
-    user->next = next;
+
+void setChannel(struct userInfo * user, int channelIndex) {
+    user->inChannel = channelIndex;
 }
 
 void newUser(struct userInfo * users, int index, char * IP, int port) {
@@ -102,6 +68,7 @@ void newUser(struct userInfo * users, int index, char * IP, int port) {
     newUser->next = NULL;
     newUser->index = index;
     newUser->loggedIn = -1;
+    newUser->inChannel = -1;
     newUser->port = port;
     newUser->username = malloc(MAX_USERNAME);
     newUser->conTime = malloc(sizeof(struct tm));
@@ -109,15 +76,6 @@ void newUser(struct userInfo * users, int index, char * IP, int port) {
     strcpy(newUser->IP, IP);
 }
 
-void addUser(struct userInfo * user, struct userInfo * users) {
-    struct userInfo * current = users;
-
-    while(current->next != NULL) {
-        current = current->next;
-    }
-    current->next = user;
-    user->next = NULL;
-}
 
 struct userInfo * searchByUsername(struct userInfo * users, char * username) {
     struct userInfo * current = users->next;
@@ -161,6 +119,83 @@ int nbUsers (struct userInfo * users) {
         current = current->next;
         nbUsers++;
     }
-
+    free(current);
     return nbUsers;
+}
+
+void whois (char * buffer, char * username, struct userInfo * users) {
+    struct userInfo * user = searchByUsername(users, username);
+
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+
+    if (user != NULL) {
+        sprintf(buffer, "%s is since %04d-%02d-%02d %02d:%02d:%02d with IP address %s and port number %i in %i\n", user->username,1900+user->conTime->tm_year,1+user->conTime->tm_mon,user->conTime->tm_mday,user->conTime->tm_hour,user->conTime->tm_min,user->conTime->tm_sec, user->IP, user->port, user->inChannel);
+    } else {
+        sprintf(buffer, "%s", "The user does not exist or is not connected\n");
+    }
+    //free(user);
+}
+
+void who (char * buffer, struct userInfo * users, int channelIndex) {
+    char * sentence = malloc(200*sizeof(char));
+    struct userInfo * current = users->next;
+
+    sprintf(sentence, "%s", "Online users are : ");
+
+    while(current != NULL) {
+        if(channelIndex == -1){
+            strcat(sentence, "\n\t- ");
+            strcat(sentence, current->username);
+        }
+        else if (isInChannel(current)==channelIndex){
+            strcat(sentence, "\n\t- ");
+            strcat(sentence, current->username);
+        }
+
+        current = current->next;
+    }
+    strcat(sentence, "\n");
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+    sprintf(buffer, "%s", sentence);
+}
+
+void nick(char * buffer, struct userInfo * users, char * username, struct userInfo * currentUser) {
+    struct userInfo * available = searchByUsername(users, username);
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+    if (available == NULL) {
+        strcpy(currentUser->username, username);
+        sprintf(buffer, "Your new username is %s. Welcome back !\n", currentUser->username);
+    } else {
+        sprintf(buffer, "%s", "The username is already taken.\n");
+    }
+}
+
+void loggedIn (char * buffer, struct userInfo * users, int rdwrSock, struct userInfo * currentUser) {
+    char * username = malloc(MAX_USERNAME*sizeof(char));
+    struct userInfo * available = malloc(sizeof(struct userInfo));
+    time_t seconds = time(NULL);
+
+    if (!strncmp(buffer, "/nick ", 6)) {
+        sscanf(buffer, "/nick %s", username);
+         available = searchByUsername(users, username);
+
+        if (available == NULL) {
+            strcpy(currentUser->username, username);
+            currentUser->loggedIn = 1;
+            currentUser->conTime = localtime(&seconds);
+
+            memset(buffer, '\0', MAX_BUFFER_SIZE);
+            sprintf(buffer, "Welcome on the chat %s", username);
+        }
+        else {
+            memset(buffer, '\0', MAX_BUFFER_SIZE);
+            sprintf(buffer, "%s", "This user is already connected\n");
+        }
+
+    } else {
+        memset(buffer, '\0', MAX_BUFFER_SIZE);
+        sprintf(buffer, "%s", "Please logon with /nick <your pseudo>\n");
+    }
+    //free(available);
+    //free(username);
 }

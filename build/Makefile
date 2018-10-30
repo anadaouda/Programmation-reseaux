@@ -136,6 +136,33 @@ RE216_CLIENT/fast:
 	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/build
 .PHONY : RE216_CLIENT/fast
 
+channels.o: channels.c.o
+
+.PHONY : channels.o
+
+# target to build an object file
+channels.c.o:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/channels.c.o
+.PHONY : channels.c.o
+
+channels.i: channels.c.i
+
+.PHONY : channels.i
+
+# target to preprocess a source file
+channels.c.i:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/channels.c.i
+.PHONY : channels.c.i
+
+channels.s: channels.c.s
+
+.PHONY : channels.s
+
+# target to generate assembly for a file
+channels.c.s:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/channels.c.s
+.PHONY : channels.c.s
+
 client.o: client.c.o
 
 .PHONY : client.o
@@ -227,6 +254,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... RE216_SERVER"
 	@echo "... RE216_CLIENT"
+	@echo "... channels.o"
+	@echo "... channels.i"
+	@echo "... channels.s"
 	@echo "... client.o"
 	@echo "... client.i"
 	@echo "... client.s"

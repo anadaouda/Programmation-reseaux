@@ -14,6 +14,7 @@ target_link_libraries (RE216_CLIENT ${CMAKE_THREAD_LIBS_INIT})
 
 #add here source files you need to compile and link to the server app
 SET(SRC_SERVER
+	channels.c
 	users.c
         server.c)
 

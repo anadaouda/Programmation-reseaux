@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
+  "/home/ana/Documents/S7/Programmation réseaux/src/channels.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/channels.c.o"
   "/home/ana/Documents/S7/Programmation réseaux/src/server.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/server.c.o"
   "/home/ana/Documents/S7/Programmation réseaux/src/users.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/users.c.o"
   )

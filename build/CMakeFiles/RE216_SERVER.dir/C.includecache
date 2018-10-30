@@ -6,6 +6,22 @@
 
 #IncludeRegexTransform: 
 
+/home/ana/Documents/S7/Programmation réseaux/src/channels.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
+header/users.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/users.h
+
+/home/ana/Documents/S7/Programmation réseaux/src/header/channels.h
+
 /home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 
 /home/ana/Documents/S7/Programmation réseaux/src/header/users.h
@@ -39,6 +55,8 @@ header/users.h
 /home/ana/Documents/S7/Programmation réseaux/src/header/users.h
 header/constant.h
 /home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
+header/channels.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/channels.h
 
 /home/ana/Documents/S7/Programmation réseaux/src/users.c
 stdio.h
@@ -46,6 +64,8 @@ stdio.h
 stdlib.h
 -
 string.h
+-
+time.h
 -
 unistd.h
 -
@@ -59,11 +79,9 @@ arpa/inet.h
 -
 limits.h
 -
-poll.h
--
-time.h
--
 netdb.h
+-
+poll.h
 -
 header/constant.h
 /home/ana/Documents/S7/Programmation réseaux/src/header/constant.h

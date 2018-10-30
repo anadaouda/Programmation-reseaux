@@ -13,6 +13,7 @@
 
 #include "header/users.h"
 #include "header/constant.h"
+#include "header/channels.h"
 
 // creates the listening socket
 int do_socket() {
@@ -68,9 +69,14 @@ int do_accept(int sockServer, struct sockaddr_in sockAddr) {
 }
 
 
-void do_send(int rdwrSock, char * buffer) {
+void do_send(int rdwrSock, char * buffer, char * who) {
     int strSent;
     int messageLen = MAX_BUFFER_SIZE;
+
+    char * sender = malloc(MAX_USERNAME);
+    sprintf(sender, "[%s] : ", who);
+    strcat(sender, buffer);
+    buffer = sender;
 
     do {
         strSent = send(rdwrSock,&messageLen,sizeof(int),0);
@@ -138,79 +144,47 @@ int nbOpenFd(struct pollfd structPollFd[]) {
     return openFd;
 }
 
-void whois (char * buffer, char * username, struct userInfo * users) {
-    struct userInfo * user = searchByUsername(users, username);
-
-    memset(buffer, '\0', MAX_BUFFER_SIZE);
-    if (user != NULL) {
-        sprintf(buffer, "%s is connected since %04d-%02d-%02d %02d:%02d:%02d with IP address %s and port number %i\n", getUsername(user),getYear(user),getMonth(user),getDay(user),getHour(user),getMinute(user),getSecond(user), getIP(user), getPort(user));
-
-    } else {
-        sprintf(buffer, "%s", "The user does not exist or is not connected\n");
-    }
-}
-
-void who (char * buffer, struct userInfo * users) {
-    char * sentence = malloc(200*sizeof(char));
-    struct userInfo * current = getNext(users);
-
-    sprintf(sentence, "%s", "Online users are : ");
-    while(current != NULL) {
-            strcat(sentence, "\n\t- ");
-            strcat(sentence, getUsername(current));
-        current = getNext(current);
-    }
-    strcat(sentence, "\n");
-    memset(buffer, '\0', MAX_BUFFER_SIZE);
-    sprintf(buffer, "%s", sentence);
-}
-
-void nick(char * buffer, struct userInfo * users, char * username, struct userInfo * currentUser) {
-    struct userInfo * available = searchByUsername(users, username);
-    memset(buffer, '\0', MAX_BUFFER_SIZE);
-    if (available == NULL) {
-        strcpy(getUsername(currentUser), username);
-        sprintf(buffer, "Your new username is %s. Welcome back !\n", getUsername(currentUser));
-    } else {
-        sprintf(buffer, "%s", "The username is already taken.\n");
-    }
-}
-
-void loggedIn (char * buffer, struct userInfo * users, int rdwrSock, struct userInfo * currentUser) {
-    char * username = malloc(MAX_USERNAME*sizeof(char));
-    struct userInfo * available = createUser();
-    time_t seconds = time(NULL);
-
-    if (!strncmp(buffer, "/nick ", 6)) {
-        sscanf(buffer, "/nick %s", username);
-         available = searchByUsername(users, username);
-        if (available == NULL) {
-            strcpy(getUsername(currentUser), username);
-            setLoggedIn(currentUser, 1);
-            setConTime(currentUser,localtime(&seconds));
-            memset(buffer, '\0', MAX_BUFFER_SIZE);
-            sprintf(buffer, "Welcome on the chat %s", username);
-            do_send(rdwrSock, buffer);
-        }
-        else {
-            memset(buffer, '\0', MAX_BUFFER_SIZE);
-            buffer = "This user is already connected\n";
-            do_send(rdwrSock, buffer);
-        }
-    } else {
-        memset(buffer, '\0', MAX_BUFFER_SIZE);
-        buffer = "Please logon with /nick <your pseudo>\n";
-        do_send(rdwrSock, buffer);
-    }
-}
-
 void quit(char * buffer, struct pollfd * structPollFd, int i, struct userInfo * users) {
     memset(buffer, '\0', MAX_BUFFER_SIZE);
     buffer = "You will be terminated\n";
-    do_send(structPollFd->fd ,"You will be terminated");
+    do_send(structPollFd->fd ,"You will be terminated", "SERVER");
     close(structPollFd->fd);
     memset(structPollFd, '\0', sizeof(struct pollfd));
     deleteUser(i, users);
+}
+
+void msgall(struct userInfo * sender, char * message, struct userInfo * users, struct pollfd structPollFd[], int channelIndex) {
+    struct userInfo * current = users;
+
+    if (channelIndex == -1) {
+        while(current != NULL) {
+            if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))) {
+                do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
+            }
+            current = getNext(current);
+        }
+    } else {
+        while(current != NULL) {
+            printf("%i\n", isInChannel(current));
+            fflush(stdout);
+            if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))&&(isInChannel(current) == channelIndex)) {
+                do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
+            }
+            current = getNext(current);
+        }
+    }
+}
+
+int msg(struct userInfo * sender, char * username, char * message, struct userInfo * users, struct pollfd structPollFd[], char * buffer) {
+    int err = 0;
+    struct userInfo * receiver = searchByUsername(users, username);
+    if (receiver != NULL) {
+        do_send(structPollFd[getIndex(receiver)].fd, message, getUsername(sender));
+        err++;
+    } else {
+        sprintf(buffer, "L'utilisateur '%s' n'existe pas ou n'est pas connecte\n",username);
+    }
+    return err;
 }
 
 int main(int argc, char** argv) {
@@ -239,14 +213,15 @@ int main(int argc, char** argv) {
     structPollFd[0].fd = sockServer;
     structPollFd[0].events = POLLIN;
 
-    struct userInfo * users = createUser();
-    setNext(users, NULL);
+    struct userInfo * users = createUsers();
+    struct channelInfo * channels = createChannel();
 
     int rdwrSock;
     int i;
     int resPoll;
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
-    struct userInfo * currentUser = createUser();
+    struct userInfo * currentUser = createUsers();
+    char * name = malloc(MAX_USERNAME);
 
     while(1) {
         resPoll = poll(structPollFd, MAX_FD + 1, -1);
@@ -254,7 +229,7 @@ int main(int argc, char** argv) {
         if (structPollFd[0].revents == POLLIN) {
             if (nbOpenFd(structPollFd) >= MAX_FD) {
                 rdwrSock = do_accept(sockServer, sockAddr);
-                do_send(rdwrSock, "/serverOverload");
+                do_send(rdwrSock, "/serverOverload", "SERVER");
                 close(rdwrSock);
             }
             else if (resPoll == -1) {
@@ -268,7 +243,7 @@ int main(int argc, char** argv) {
                 structPollFd[i].fd = rdwrSock;
                 structPollFd[i].events = POLLIN;
                 newUser(users, i, inet_ntoa(sockAddr.sin_addr), sockAddr.sin_port);
-                do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>");
+                do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>", "SERVER");
 
             }
         }
@@ -277,35 +252,84 @@ int main(int argc, char** argv) {
             for (i = 1; i < MAX_FD + 1; i++) {
                 if (structPollFd[i].revents == POLLIN) {
                     currentUser = searchByIndex(users, i);
-                    if (getLoggedIn(currentUser) == 1) {
+                    if ((getLoggedIn(currentUser) == 1)&&(isInChannel(currentUser) == -1)) {
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strncmp(buffer, "/whois ", 7)) {
-                            char * username = malloc(MAX_USERNAME);
-                            sscanf(buffer, "/whois %s", username);
-                            whois(buffer, username, users);
+                            //char * username = malloc(MAX_USERNAME);
+                            sscanf(buffer, "/whois %s", name);
+                            whois(buffer, name, users);
+                            //qfree(username);
                         }
                         else if (!strncmp(buffer, "/who\n", 5)) {
-                            who(buffer, users);
+                            who(buffer, users,-1);
+                        }
+                        else if (!strncmp(buffer, "/channellist\n", 13)) {
+                            channelList(buffer, channels);
                         }
                         else if (!strncmp(buffer, "/nick ", 6)) {
                             char * username = malloc(MAX_USERNAME);
                             sscanf(buffer, "/nick %s", username);
                             nick(buffer, users, username, currentUser);
                         }
+                        else if (!strncmp(buffer, "/msgall ", 8)) {
+                            char * message = malloc(MAX_BUFFER_SIZE);
+                            sscanf(buffer, "/msgall %[^\n]s", message);
+                            msgall(currentUser, message, users, structPollFd, -1);
+                            break;
+                        }
+                        else if (!strncmp(buffer, "/msg ", 5)) {
+                            char * message = malloc(MAX_BUFFER_SIZE);
+                            char * username = malloc(MAX_USERNAME);
+                            sscanf(buffer, "/msg %s %[^\n]s", username, message);
+                            if (msg(currentUser,username, message, users, structPollFd, buffer)) {
+                                break;
+                            }
+                        }
+                        else if (!strncmp(buffer, "/createchannel ", 15)) {
+                            char * channelName = malloc(MAX_CHANNEL_NAME);
+                            sscanf(buffer, "/createchannel %s", channelName);
+                            newChannel(channels, channelName, buffer);
+                        }
+                        else if (!strncmp(buffer, "/join ", 6)) {
+                            char * channelName = malloc(MAX_CHANNEL_NAME);
+                            sscanf(buffer, "/join %s", channelName);
+                            join(channels, channelName, currentUser, users,buffer);
+                        }
                         else if (!strcmp(buffer, "/quit\n")) {
                             quit(buffer, &structPollFd[i], i, users);
                             break;
                         }
-                        if (structPollFd[i].fd != 0) {
-                            do_send(structPollFd[i].fd, buffer);
-                        }
+                        //if (structPollFd[i].fd != 0) {
+                            do_send(structPollFd[i].fd, buffer, "SERVER");
+                        //}
                     } else if (getLoggedIn(currentUser)==-1) {
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strcmp(buffer, "/quit\n")) {
                             quit(buffer, &structPollFd[i], i, users);
+                            break;
                         }
                         loggedIn(buffer, users, structPollFd[i].fd, currentUser);
+                        do_send(structPollFd[i].fd, buffer, "SERVER");
                     }
+                    else if (isInChannel(currentUser) != -1) {
+                        struct channelInfo * currentChannel = searchChannelByIndex(channels,isInChannel(currentUser));
+                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
+                        if (!strncmp(buffer, "/quit ", 6)) {
+                            char * channelName = malloc(MAX_CHANNEL_NAME);
+                            sscanf(buffer, "/quit %s", channelName);
+                            quitChannel(channels, channelName, currentUser, buffer);
+                        }
+                        else if (!strncmp(buffer, "/who\n", 5)) {
+                            who(buffer, users, isInChannel(currentUser)); //ajoutrer le num de chaine
+                        }
+                        else {
+                            msgall(currentUser, buffer, users, structPollFd, isInChannel(currentUser));
+                            break;
+                        }
+                        do_send(structPollFd[i].fd, buffer, "SERVER");
+                    }
+                        //tout les messages sont en broadcast
+                        //quit
                 }
         }
     }

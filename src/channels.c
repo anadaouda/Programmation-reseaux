@@ -8,7 +8,7 @@
 
 struct channelInfo {
     int index;
-    struct userInfo * channelUsers;
+    int nbUsers;
     char * name;
     struct channelInfo * next;
 };
@@ -19,6 +19,17 @@ struct channelInfo * createChannel() {
     return channel;
 }
 
+int nbChannels (struct channelInfo * channels) {
+    int nbChannels = 0;
+    struct channelInfo * current = channels;
+
+    while(current->next != NULL) {
+        current = current->next;
+        nbChannels++;
+    }
+
+    return nbChannels;
+}
 char * getChannelName(struct channelInfo * channel) {
     return channel->name;
 }
@@ -35,30 +46,6 @@ void setChannelNext(struct channelInfo * channel, struct channelInfo * next) {
     channel->next = next;
 }
 
-void newChannel(struct channelInfo * channels, int index, char * name, char * buffer) {
-    struct channelInfo * verification = searchByChannelName(channels, name);
-
-    if (verification == NULL) {
-        struct channelInfo * current = channel;
-        struct channelInfo * newChannel = malloc(sizeof(struct channelInfo));
-
-        while(current->next != NULL) {
-            current = current->next;
-        }
-
-        current->next = newChannel;
-        newChannel->next = NULL;
-        newChannel->index = index;
-        newChannel->name = malloc(MAX_USERNAME);
-        strcpy(newChannel->name, name);
-        newChannel->users = createUser();
-        sprintf(buffer, "%s channel has been created\n", name);
-    }
-    else {
-        sprintf(buffer,"%s", "channel name already exists\n");
-    }
-
-}
 
 struct channelInfo * searchByChannelName(struct channelInfo * channel, char * name) {
     struct channelInfo * current = channel->next;
@@ -79,8 +66,29 @@ struct channelInfo * searchChannelByIndex(struct channelInfo * channel, int inde
     return current;
 }
 
-int channelNbUser(struct channelInfo * channel){
-    return nbUsers(channel->channelUsers);
+void newChannel(struct channelInfo * channels, char * name, char * buffer) {
+    struct channelInfo * verification = searchByChannelName(channels, name);
+
+    if (verification == NULL) {
+        struct channelInfo * current = channels;
+        struct channelInfo * newChannel = malloc(sizeof(struct channelInfo));
+
+        while(current->next != NULL) {
+            current = current->next;
+        }
+
+        current->next = newChannel;
+        newChannel->next = NULL;
+        newChannel->index = nbChannels(channels);
+        newChannel->nbUsers = 0;
+        newChannel->name = malloc(MAX_USERNAME);
+        strcpy(newChannel->name, name);
+        sprintf(buffer, "%s channel has been created\n", name);
+    }
+    else {
+        sprintf(buffer,"%s", "channel name already exists\n");
+    }
+
 }
 
 void deleteChannel(int index, struct channelInfo * channel) {
@@ -97,14 +105,50 @@ void deleteChannel(int index, struct channelInfo * channel) {
     }
 }
 
-void join(struct channelInfo * channels, char * name, struct userInfo * user, char * buffer) {
+void join(struct channelInfo * channels, char * name, struct userInfo * user,struct userInfo * users, char * buffer) {
     struct channelInfo * channel = searchByChannelName(channels, name);
-
     if (channel != NULL) {
-        addUser(user, channel->channelUsers);
+        setChannel(user, channel->index);
+        channel->nbUsers++;
         sprintf(buffer, "You have joined %s\n", name);
     }
     else {
-        sprintf(buffer, "the channel doesnt exist\n");
+        sprintf(buffer, "the channel does'nt exist\n");
     }
+}
+
+void quitChannel(struct channelInfo * channels, char * name, struct userInfo * user, char * buffer) {
+    struct channelInfo * channel = searchByChannelName(channels, name);
+    if ((channel !=NULL)&&(getChannelIndex(channel) == isInChannel(user))) {
+        setChannel(user, -1);
+        channel->nbUsers--;
+        sprintf(buffer, "You left %s\n", name);
+        if(channel->nbUsers == 0) {
+            deleteChannel(channel->index,channels);
+        }
+    }
+    else if (channel == NULL) {
+        sprintf(buffer, "The channel doesn't exist\n");
+    }
+    else {
+        sprintf(buffer, "You are not in this channel\n");
+    }
+}
+
+void channelList(char * buffer, struct channelInfo * channels) {
+    char * sentence = malloc(200*sizeof(char));
+    struct channelInfo * current = channels->next;
+    char * index = malloc(1);
+    sprintf(sentence, "%s", "Active channels are : ");
+    while(current != NULL) {
+        strcat(sentence, "\n\t- ");
+        strcat(sentence, current->name);
+        strcat(sentence, " ");
+        sprintf(index, "%c", current->index+'0');
+        strcat(sentence, index);
+        current = current->next;
+    }
+    strcat(sentence, "\n");
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+    sprintf(buffer, "%s", sentence);
 }

@@ -121,16 +121,16 @@ void * handle_client_message(void * args) {
 
     while(1) {
         do_receive(sock, buffer);
-        printf("[SERVER] : %s\n\n",buffer);
+        printf("%s\n",buffer);
         fflush(stdout);
 
-        if (!strcmp(buffer, "/serverOverload")) {
+        if (!strcmp(buffer, "[SERVER] : /serverOverload")) {
             printf("Server cannot accept incoming connections anymore. Try again later\n");
             close(sock);
             free(buffer);
             exit(1);
         }
-        else if (!strncmp(buffer,"You will be terminated",22)) {
+        else if (!strncmp(buffer,"[SERVER] : You will be terminated",33)) {
             close(sock);
             free(buffer);
             printf("Disconnected\n");
@@ -153,14 +153,8 @@ int main(int argc,char** argv) {
     }
 
     struct sockaddr_in sockServerAddr = get_addr_info(argv);
-
-    //get the socket
     int sock = do_socket();
-
-    //connect to remote socket
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
-
-    // get ip + port avec get sock name
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
     pthread_t ecoute;
@@ -172,7 +166,6 @@ int main(int argc,char** argv) {
     pthread_create(&ecriture, NULL, do_send, (void *)&arguments);
 
     pthread_join(ecoute, NULL);
-    //phtread_join(ecriture, NULL);
 
     return 0;
 }

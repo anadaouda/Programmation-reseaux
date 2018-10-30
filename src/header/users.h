@@ -3,31 +3,24 @@
 
 struct userInfo;
 
-char * getUsername(struct userInfo * user);
-int getYear(struct userInfo * user);
-int getMonth(struct userInfo * user);
-int getDay(struct userInfo * user);
-int getHour(struct userInfo * user);
-int getMinute(struct userInfo * user);
-int getSecond(struct userInfo * user);
-char * getIP(struct userInfo * user);
-int getPort(struct userInfo * user);
-int getIndex(struct userInfo * user);
 int getLoggedIn(struct userInfo * user);
-struct tm * getConTime(struct userInfo * user);
-
-void setLoggedIn(struct userInfo * user, int status);
-void setConTime(struct userInfo * user, struct tm * conTime);
-void setNext(struct userInfo * user, struct userInfo * next);
-
+char * getUsername(struct userInfo * user);
+int getIndex(struct userInfo * user);
 struct userInfo * getNext(struct userInfo * user);
-struct userInfo * createUser();
-void addUser(struct userInfo * user, struct userInfo * users);
+int isInChannel(struct userInfo * user);
+void setChannel(struct userInfo * user, int channelIndex);
+
+struct userInfo * createUsers();
 void newUser(struct userInfo * users, int index, char * IP, int port);
 struct userInfo * searchByUsername(struct userInfo * users, char * username);
 struct userInfo * searchByIndex(struct userInfo * users, int index);
 void deleteUser(int index, struct userInfo * users);
 
 int nbUsers (struct userInfo * users);
+
+void whois (char * buffer, char * username, struct userInfo * users);
+void who (char * buffer, struct userInfo * users, int channelIndex);
+void nick(char * buffer, struct userInfo * users, char * username, struct userInfo * currentUser);
+void loggedIn (char * buffer, struct userInfo * users, int rdwrSock, struct userInfo * currentUser);
 
 #endif /* USERS_H_ */
