@@ -138,17 +138,16 @@ void quitChannel(struct channelInfo * channels, char * name, struct userInfo * u
 void channelList(char * buffer, struct channelInfo * channels) {
     char * sentence = malloc(200*sizeof(char));
     struct channelInfo * current = channels->next;
-    char * index = malloc(1);
-    sprintf(sentence, "%s", "Active channels are : ");
+    if (!nbChannels(channels)) {
+        sprintf(sentence, "%s", "No active channels. You can create one with command :\n/createchannel channel_name");
+    } else {
+        sprintf(sentence, "%s", "Active channels are : ");
+    }
     while(current != NULL) {
         strcat(sentence, "\n\t- ");
         strcat(sentence, current->name);
-        strcat(sentence, " ");
-        sprintf(index, "%c", current->index+'0');
-        strcat(sentence, index);
         current = current->next;
     }
-    strcat(sentence, "\n");
     memset(buffer, '\0', MAX_BUFFER_SIZE);
     sprintf(buffer, "%s", sentence);
 }

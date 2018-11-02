@@ -73,7 +73,7 @@ void do_send(int rdwrSock, char * buffer, char * who) {
     int strSent;
     int messageLen = MAX_BUFFER_SIZE;
 
-    char * sender = malloc(MAX_USERNAME);
+    char * sender = malloc(MAX_BUFFER_SIZE);
     sprintf(sender, "[%s] : ", who);
     strcat(sender, buffer);
     buffer = sender;
@@ -165,8 +165,6 @@ void msgall(struct userInfo * sender, char * message, struct userInfo * users, s
         }
     } else {
         while(current != NULL) {
-            printf("%i\n", isInChannel(current));
-            fflush(stdout);
             if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))&&(isInChannel(current) == channelIndex)) {
                 do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
             }
@@ -221,7 +219,10 @@ int main(int argc, char** argv) {
     int resPoll;
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
     struct userInfo * currentUser = createUsers();
-    char * name = malloc(MAX_USERNAME);
+    struct channelInfo * currentChannel = createChannel();
+    char * username = malloc(MAX_USERNAME);
+    char * channelName = malloc(MAX_CHANNEL_NAME);
+    char * message = malloc(MAX_BUFFER_SIZE);
 
     while(1) {
         resPoll = poll(structPollFd, MAX_FD + 1, -1);
@@ -256,9 +257,10 @@ int main(int argc, char** argv) {
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strncmp(buffer, "/whois ", 7)) {
                             //char * username = malloc(MAX_USERNAME);
-                            sscanf(buffer, "/whois %s", name);
-                            whois(buffer, name, users);
-                            //qfree(username);
+                            memset(username, '0', MAX_USERNAME);
+                            sscanf(buffer, "/whois %s", username);
+                            whois(buffer, username, users);
+                            //free(username);
                         }
                         else if (!strncmp(buffer, "/who\n", 5)) {
                             who(buffer, users,-1);
@@ -267,31 +269,43 @@ int main(int argc, char** argv) {
                             channelList(buffer, channels);
                         }
                         else if (!strncmp(buffer, "/nick ", 6)) {
-                            char * username = malloc(MAX_USERNAME);
+                            //char * username = malloc(MAX_USERNAME);
+                            memset(username, '0', MAX_USERNAME);
                             sscanf(buffer, "/nick %s", username);
                             nick(buffer, users, username, currentUser);
+                            //free(username);
                         }
                         else if (!strncmp(buffer, "/msgall ", 8)) {
-                            char * message = malloc(MAX_BUFFER_SIZE);
+                            //char * message = malloc(MAX_BUFFER_SIZE);
+                            memset(message, '0', MAX_BUFFER_SIZE);
                             sscanf(buffer, "/msgall %[^\n]s", message);
                             msgall(currentUser, message, users, structPollFd, -1);
+                            //free(message);
                             break;
                         }
                         else if (!strncmp(buffer, "/msg ", 5)) {
-                            char * message = malloc(MAX_BUFFER_SIZE);
-                            char * username = malloc(MAX_USERNAME);
+                            //char * message = malloc(MAX_BUFFER_SIZE);
+                            //char * username = malloc(MAX_USERNAME);
+                            memset(username, '0', MAX_USERNAME);
+                            memset(message, '0', MAX_BUFFER_SIZE);
                             sscanf(buffer, "/msg %s %[^\n]s", username, message);
                             if (msg(currentUser,username, message, users, structPollFd, buffer)) {
+                                //free(username)
+                                //free(message);
                                 break;
                             }
+                            //free(message);
+                            //free(username);
                         }
                         else if (!strncmp(buffer, "/createchannel ", 15)) {
-                            char * channelName = malloc(MAX_CHANNEL_NAME);
+                            //char * channelName = malloc(MAX_CHANNEL_NAME);
+                            memset(channelName, '0', MAX_CHANNEL_NAME);
                             sscanf(buffer, "/createchannel %s", channelName);
                             newChannel(channels, channelName, buffer);
                         }
                         else if (!strncmp(buffer, "/join ", 6)) {
-                            char * channelName = malloc(MAX_CHANNEL_NAME);
+                            //char * channelName = malloc(MAX_CHANNEL_NAME);
+                            memset(channelName, '0', MAX_CHANNEL_NAME);
                             sscanf(buffer, "/join %s", channelName);
                             join(channels, channelName, currentUser, users,buffer);
                         }
@@ -299,9 +313,8 @@ int main(int argc, char** argv) {
                             quit(buffer, &structPollFd[i], i, users);
                             break;
                         }
-                        //if (structPollFd[i].fd != 0) {
-                            do_send(structPollFd[i].fd, buffer, "SERVER");
-                        //}
+                        do_send(structPollFd[i].fd, buffer, "SERVER");
+
                     } else if (getLoggedIn(currentUser)==-1) {
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
                         if (!strcmp(buffer, "/quit\n")) {
@@ -312,10 +325,12 @@ int main(int argc, char** argv) {
                         do_send(structPollFd[i].fd, buffer, "SERVER");
                     }
                     else if (isInChannel(currentUser) != -1) {
-                        struct channelInfo * currentChannel = searchChannelByIndex(channels,isInChannel(currentUser));
+                        currentChannel = searchChannelByIndex(channels,isInChannel(currentUser));
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
+
                         if (!strncmp(buffer, "/quit ", 6)) {
-                            char * channelName = malloc(MAX_CHANNEL_NAME);
+                            //char * channelName = malloc(MAX_CHANNEL_NAME);
+                            memset(channelName, '0', MAX_CHANNEL_NAME);
                             sscanf(buffer, "/quit %s", channelName);
                             quitChannel(channels, channelName, currentUser, buffer);
                         }
@@ -326,10 +341,9 @@ int main(int argc, char** argv) {
                             msgall(currentUser, buffer, users, structPollFd, isInChannel(currentUser));
                             break;
                         }
+
                         do_send(structPollFd[i].fd, buffer, "SERVER");
                     }
-                        //tout les messages sont en broadcast
-                        //quit
                 }
         }
     }

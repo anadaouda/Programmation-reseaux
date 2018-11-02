@@ -3,17 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-/*
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <limits.h>
-#include <netdb.h>
-#include <poll.h>
-*/
-
 #include "header/constant.h"
 
 struct userInfo {
@@ -119,21 +108,21 @@ int nbUsers (struct userInfo * users) {
         current = current->next;
         nbUsers++;
     }
-    free(current);
     return nbUsers;
 }
 
 void whois (char * buffer, char * username, struct userInfo * users) {
+    printf("Dedans\n");
+    fflush(stdout);
     struct userInfo * user = searchByUsername(users, username);
 
     memset(buffer, '\0', MAX_BUFFER_SIZE);
 
     if (user != NULL) {
-        sprintf(buffer, "%s is since %04d-%02d-%02d %02d:%02d:%02d with IP address %s and port number %i in %i\n", user->username,1900+user->conTime->tm_year,1+user->conTime->tm_mon,user->conTime->tm_mday,user->conTime->tm_hour,user->conTime->tm_min,user->conTime->tm_sec, user->IP, user->port, user->inChannel);
+        sprintf(buffer, "%s connected since %04d-%02d-%02d %02d:%02d:%02d with IP address %s and port number %i in %i\n", user->username,1900+user->conTime->tm_year,1+user->conTime->tm_mon,user->conTime->tm_mday,user->conTime->tm_hour,user->conTime->tm_min,user->conTime->tm_sec, user->IP, user->port, user->inChannel);
     } else {
         sprintf(buffer, "%s", "The user does not exist or is not connected\n");
     }
-    //free(user);
 }
 
 void who (char * buffer, struct userInfo * users, int channelIndex) {
@@ -196,6 +185,4 @@ void loggedIn (char * buffer, struct userInfo * users, int rdwrSock, struct user
         memset(buffer, '\0', MAX_BUFFER_SIZE);
         sprintf(buffer, "%s", "Please logon with /nick <your pseudo>\n");
     }
-    //free(available);
-    //free(username);
 }
