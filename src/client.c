@@ -62,35 +62,52 @@ void message_to_send(char * input) {
     fgets(input,MAX_BUFFER_SIZE*sizeof(char),stdin);
 }
 
-void * do_send(void * args) {
+void do_send(char * buffer, int sock) {
+    int strSent;
+    int inputLen = strlen(buffer);
+
+    do {
+        strSent = send(sock,&inputLen,sizeof(int),0);
+        if (strSent == -1) {
+            perror("Send");
+            exit(EXIT_FAILURE);
+        }
+    } while (strSent != sizeof(int));
+
+    do {
+        strSent = send(sock,buffer,strlen(buffer),0);
+        if (strSent == -1) {
+            perror("Send");
+            exit(EXIT_FAILURE);
+        }
+    } while (strSent != strlen(buffer));
+}
+
+void * writeThread(void * args) {
     struct args arguments = *(struct args *)args;
     char * buffer = arguments.buffer;
     int sock = arguments.sock;
 
     while(1) {
-        int strSent;
         message_to_send(buffer);
-        int inputLen = strlen(buffer);
-
-        do {
-            strSent = send(sock,&inputLen,sizeof(int),0);
-            if (strSent == -1) {
-                perror("Send");
-                exit(EXIT_FAILURE);
-            }
-        } while (strSent != sizeof(int));
-
-        do {
-            strSent = send(sock,buffer,strlen(buffer),0);
-            if (strSent == -1) {
-                perror("Send");
-                exit(EXIT_FAILURE);
-            }
-        } while (strSent != strlen(buffer));
+        do_send(buffer, sock);
 
         if (!strcmp(buffer, "/quit\n")) {
+            //pthread_join(sdFile, NULL);
             return NULL;
         }
+        /*
+        else if (strncmp(buffer, "/send ", 6)) {
+            //verifier que le fichier existe
+            //creer la socket
+            //bind et listen
+            //envoyer la requete send pour verification plus adresse et IP
+            //attendre que le serveur dise que c'est bon (avec une condition puis remettre la cond a 0)
+            //si oui envoyer le port et l'adresse IP
+            //faire un accept
+            //envoyer la fichier et fermer la socket
+        }
+        */
     }
     return NULL;
 }
@@ -114,7 +131,7 @@ void do_receive(int sock, char * buffer) {
         } while (strReceived != strSizeToReceive);
 }
 
-void * handle_client_message(void * args) {
+void * readThread(void * args) {
     struct args arguments = *(struct args *)args;
     char * buffer = arguments.buffer;
     int sock = arguments.sock;
@@ -136,7 +153,19 @@ void * handle_client_message(void * args) {
             printf("Disconnected\n");
             fflush(stdout);
             exit(1);
+        }/*
+        else if (!strncmp(buffer, "[SERVER] : /send ", 17)) {
+            //recuperer desc
+            //modifier la variable peut envoyer et le signaler
         }
+        else if (!strncmp(buffer, "[SERVER] : /rcvFile ", 20)) {
+            //recuperer desc
+            //ouvrir une socket
+            //se connecter
+            //recevoir et enregistrer le fichier
+            //fermer la socket
+        }
+        */
     }
     return NULL;
 }
@@ -157,15 +186,30 @@ int main(int argc,char** argv) {
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
-    pthread_t ecoute;
-    pthread_t ecriture;
+    pthread_t rdThread;
+    pthread_t wrThread;
 
     struct args arguments = {sock, buffer};
 
-    pthread_create(&ecoute, NULL, handle_client_message, (void *)&arguments);
-    pthread_create(&ecriture, NULL, do_send, (void *)&arguments);
+    pthread_create(&rdThread, NULL, readThread, (void *)&arguments);
+    pthread_create(&wrThread, NULL, writeThread, (void *)&arguments);
 
-    pthread_join(ecoute, NULL);
+    pthread_join(rdThread, NULL);
 
     return 0;
 }
+
+/*
+void * sendFile(void * args) {
+    struct args arguments = *(struct args2 *)args;
+
+    char * buffer = arguments.buffer;
+    int sock = arguments.sock;
+
+    wrSock = accept(); //appel bloquant normalement
+    fopen(file);
+    read(file); dans le buffer
+    do_send(buffer, wrSock)
+    return NULL;
+}
+*/

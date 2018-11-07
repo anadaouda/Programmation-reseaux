@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
                             memset(username, '0', MAX_USERNAME);
                             sscanf(buffer, "/whois %s", username);
                             whois(buffer, username, users);
-                            
+
                         }
                         else if (!strncmp(buffer, "/who\n", 5)) {
                             who(buffer, users,-1);
@@ -300,6 +300,14 @@ int main(int argc, char** argv) {
                             quit(buffer, &structPollFd[i], i, users);
                             break;
                         }
+                        /*
+                        else if cest une commande send il faut verifier que le user existe
+                            si oui envouer /send userClear et changer la variable accepted share du recepteur à l'index de l'expediteur?
+                            mettre @IP et port
+                            envoyer au recepteur y ou n
+                            sinon envoyer error
+                            break
+                        */
                         do_send(structPollFd[i].fd, buffer, "SERVER");
 
                     } else if (getLoggedIn(currentUser)==-1) { //if client is not connected
@@ -311,6 +319,14 @@ int main(int argc, char** argv) {
                         loggedIn(buffer, users, structPollFd[i].fd, currentUser);
                         do_send(structPollFd[i].fd, buffer, "SERVER");
                     }
+                    /*
+                    else if (acceptedShare(currentUser) != 0) {
+                        if yes envoyer ip et sin_port au currentUser
+                        if no renvoyer send error au numero du accepted acceptedShare
+                        dans les deux cas changer le acceptedShare a 0;
+
+                    }
+                    */
                     else if (isInChannel(currentUser) != -1) { //if client is in a channel
                         currentChannel = searchChannelByIndex(channels,isInChannel(currentUser));
                         do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);

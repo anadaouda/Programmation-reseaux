@@ -67,22 +67,6 @@ string.h
 -
 time.h
 -
-unistd.h
--
-sys/types.h
--
-sys/socket.h
--
-netinet/in.h
--
-arpa/inet.h
--
-limits.h
--
-netdb.h
--
-poll.h
--
 header/constant.h
 /home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 
