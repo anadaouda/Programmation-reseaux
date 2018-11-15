@@ -12,6 +12,8 @@ struct userInfo {
     struct tm * conTime;
     char * IP;
     int port;
+    int portP2P;
+    int confirmP2P;
     struct userInfo * next;
     int inChannel;
 };
@@ -26,6 +28,19 @@ int getLoggedIn(struct userInfo * user) {
     return user->loggedIn;
 }
 
+int confirmedP2P(struct userInfo * user) {
+    return user->confirmP2P;
+}
+
+void setP2P(struct userInfo * user, int status) {
+    user->confirmP2P = status;
+}
+
+void setPortP2P(struct userInfo * user, int status) {
+    user->portP2P = status;
+}
+
+
 char * getUsername(struct userInfo * user) {
     return user->username;
 }
@@ -38,6 +53,13 @@ int getIndex(struct userInfo * user) {
     return user->index;
 }
 
+int getPortP2P(struct userInfo * user) {
+    return user->portP2P;
+}
+
+char * getIP(struct userInfo * user) {
+    return user->IP;
+}
 int isInChannel(struct userInfo * user) {
     return user->inChannel;
 }
@@ -58,7 +80,9 @@ void newUser(struct userInfo * users, int index, char * IP, int port) {
     newUser->index = index;
     newUser->loggedIn = -1;
     newUser->inChannel = -1;
+    newUser->confirmP2P = 0;
     newUser->port = port;
+    newUser->portP2P = 0;
     newUser->username = malloc(MAX_USERNAME);
     newUser->conTime = malloc(sizeof(struct tm));
     newUser->IP = malloc(100);

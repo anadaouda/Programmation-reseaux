@@ -6,6 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_C
   "/home/ana/Documents/S7/Programmation réseaux/src/channels.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/channels.c.o"
   "/home/ana/Documents/S7/Programmation réseaux/src/server.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/server.c.o"
+  "/home/ana/Documents/S7/Programmation réseaux/src/serverFunctions.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o"
   "/home/ana/Documents/S7/Programmation réseaux/src/users.c" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_SERVER.dir/users.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")

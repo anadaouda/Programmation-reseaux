@@ -154,6 +154,11 @@
 			<location>/home/ana/Documents/S7/Programmation réseaux/src/users.c</location>
 		</link>
 		<link>
+			<name>[Targets]/[exe] RE216_SERVER/Source Files/serverFunctions.c</name>
+			<type>1</type>
+			<location>/home/ana/Documents/S7/Programmation réseaux/src/serverFunctions.c</location>
+		</link>
+		<link>
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/server.c</name>
 			<type>1</type>
 			<location>/home/ana/Documents/S7/Programmation réseaux/src/server.c</location>

@@ -7,8 +7,14 @@ CMakeFiles/RE216_SERVER.dir/channels.c.o: /home/ana/Documents/S7/Programmation\ 
 
 CMakeFiles/RE216_SERVER.dir/server.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/channels.h
 CMakeFiles/RE216_SERVER.dir/server.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/constant.h
+CMakeFiles/RE216_SERVER.dir/server.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/serverFunctions.h
 CMakeFiles/RE216_SERVER.dir/server.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/users.h
 CMakeFiles/RE216_SERVER.dir/server.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/server.c
+
+CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/channels.h
+CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/constant.h
+CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/users.h
+CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/serverFunctions.c
 
 CMakeFiles/RE216_SERVER.dir/users.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/header/constant.h
 CMakeFiles/RE216_SERVER.dir/users.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/users.c

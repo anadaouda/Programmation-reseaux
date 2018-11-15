@@ -217,6 +217,33 @@ server.c.s:
 	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/server.c.s
 .PHONY : server.c.s
 
+serverFunctions.o: serverFunctions.c.o
+
+.PHONY : serverFunctions.o
+
+# target to build an object file
+serverFunctions.c.o:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o
+.PHONY : serverFunctions.c.o
+
+serverFunctions.i: serverFunctions.c.i
+
+.PHONY : serverFunctions.i
+
+# target to preprocess a source file
+serverFunctions.c.i:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/serverFunctions.c.i
+.PHONY : serverFunctions.c.i
+
+serverFunctions.s: serverFunctions.c.s
+
+.PHONY : serverFunctions.s
+
+# target to generate assembly for a file
+serverFunctions.c.s:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/serverFunctions.c.s
+.PHONY : serverFunctions.c.s
+
 users.o: users.c.o
 
 .PHONY : users.o
@@ -263,6 +290,9 @@ help:
 	@echo "... server.o"
 	@echo "... server.i"
 	@echo "... server.s"
+	@echo "... serverFunctions.o"
+	@echo "... serverFunctions.i"
+	@echo "... serverFunctions.s"
 	@echo "... users.o"
 	@echo "... users.i"
 	@echo "... users.s"
