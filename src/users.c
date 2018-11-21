@@ -13,7 +13,7 @@ struct userInfo {
     char * IP;
     int port;
     int portP2P;
-    int confirmP2P;
+    int inP2P;
     struct userInfo * next;
     int inChannel;
 };
@@ -24,16 +24,16 @@ struct userInfo * createUsers() {
     return user;
 }
 
-int getLoggedIn(struct userInfo * user) {
+int isLoggedIn(struct userInfo * user) {
     return user->loggedIn;
 }
 
-int confirmedP2P(struct userInfo * user) {
-    return user->confirmP2P;
+int isInP2P(struct userInfo * user) {
+    return user->inP2P;
 }
 
 void setP2P(struct userInfo * user, int status) {
-    user->confirmP2P = status;
+    user->inP2P = status;
 }
 
 void setPortP2P(struct userInfo * user, int status) {
@@ -80,7 +80,7 @@ void newUser(struct userInfo * users, int index, char * IP, int port) {
     newUser->index = index;
     newUser->loggedIn = -1;
     newUser->inChannel = -1;
-    newUser->confirmP2P = 0;
+    newUser->inP2P = NO;
     newUser->port = port;
     newUser->portP2P = 0;
     newUser->username = malloc(MAX_USERNAME);
@@ -135,9 +135,10 @@ int nbUsers (struct userInfo * users) {
     return nbUsers;
 }
 
-void whois (char * buffer, char * username, struct userInfo * users) {
-    printf("Dedans\n");
-    fflush(stdout);
+void whois (char * buffer, struct userInfo * users) {
+    char * username = malloc(MAX_USERNAME);
+    sscanf(buffer, "/whois %s", username);
+
     struct userInfo * user = searchByUsername(users, username);
 
     memset(buffer, '\0', MAX_BUFFER_SIZE);
@@ -172,7 +173,10 @@ void who (char * buffer, struct userInfo * users, int channelIndex) {
     sprintf(buffer, "%s", sentence);
 }
 
-void nick(char * buffer, struct userInfo * users, char * username, struct userInfo * currentUser) {
+void nick(char * buffer, struct userInfo * users, struct userInfo * currentUser) {
+    char * username = malloc(MAX_USERNAME);
+    sscanf(buffer, "/nick %s", username);
+
     struct userInfo * available = searchByUsername(users, username);
     memset(buffer, '\0', MAX_BUFFER_SIZE);
     if (available == NULL) {

@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ana/Documents/S7/ProjetRes/src
+CMAKE_SOURCE_DIR = "/home/ana/Documents/S7/Programmation réseaux/src"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ana/Documents/S7/ProjetRes/build
+CMAKE_BINARY_DIR = "/home/ana/Documents/S7/Programmation réseaux/build"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ana/Documents/S7/ProjetRes/build/CMakeFiles /home/ana/Documents/S7/ProjetRes/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/progress.marks"
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ana/Documents/S7/ProjetRes/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
@@ -135,6 +135,36 @@ RE216_CLIENT: cmake_check_build_system
 RE216_CLIENT/fast:
 	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/build
 .PHONY : RE216_CLIENT/fast
+
+P2P.o: P2P.c.o
+
+.PHONY : P2P.o
+
+# target to build an object file
+P2P.c.o:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/P2P.c.o
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/P2P.c.o
+.PHONY : P2P.c.o
+
+P2P.i: P2P.c.i
+
+.PHONY : P2P.i
+
+# target to preprocess a source file
+P2P.c.i:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/P2P.c.i
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/P2P.c.i
+.PHONY : P2P.c.i
+
+P2P.s: P2P.c.s
+
+.PHONY : P2P.s
+
+# target to generate assembly for a file
+P2P.c.s:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/P2P.c.s
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/P2P.c.s
+.PHONY : P2P.c.s
 
 channels.o: channels.c.o
 
@@ -244,6 +274,36 @@ serverFunctions.c.s:
 	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/serverFunctions.c.s
 .PHONY : serverFunctions.c.s
 
+socketSetup.o: socketSetup.c.o
+
+.PHONY : socketSetup.o
+
+# target to build an object file
+socketSetup.c.o:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/socketSetup.c.o
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o
+.PHONY : socketSetup.c.o
+
+socketSetup.i: socketSetup.c.i
+
+.PHONY : socketSetup.i
+
+# target to preprocess a source file
+socketSetup.c.i:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/socketSetup.c.i
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/socketSetup.c.i
+.PHONY : socketSetup.c.i
+
+socketSetup.s: socketSetup.c.s
+
+.PHONY : socketSetup.s
+
+# target to generate assembly for a file
+socketSetup.c.s:
+	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/socketSetup.c.s
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/socketSetup.c.s
+.PHONY : socketSetup.c.s
+
 users.o: users.c.o
 
 .PHONY : users.o
@@ -281,6 +341,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... RE216_SERVER"
 	@echo "... RE216_CLIENT"
+	@echo "... P2P.o"
+	@echo "... P2P.i"
+	@echo "... P2P.s"
 	@echo "... channels.o"
 	@echo "... channels.i"
 	@echo "... channels.s"
@@ -293,6 +356,9 @@ help:
 	@echo "... serverFunctions.o"
 	@echo "... serverFunctions.i"
 	@echo "... serverFunctions.s"
+	@echo "... socketSetup.o"
+	@echo "... socketSetup.i"
+	@echo "... socketSetup.s"
 	@echo "... users.o"
 	@echo "... users.i"
 	@echo "... users.s"

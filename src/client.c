@@ -13,8 +13,22 @@
 
 #include "header/constant.h"
 
+char * getFilename(char * path) {
+    int i, j;
+    char * result = malloc(strlen(path));
+    int position = 0;
+    for (i = 0 ; i < strlen(path); i++){
+        if(path[i] == '/'){
+            position = i+1;
+        }
+    }
 
-struct args {
+    strcpy(result, path + position);
+    return result;
+}
+
+
+struct threadArgs {
     int sock;
     char * buffer;
     int * canSend;
@@ -57,19 +71,19 @@ int do_accept(int sockP2P, struct sockaddr_in sockAddr) {
     return rdwrSock;
 }
 
-struct sockaddr_in get_addr_info(char** argv) {
+struct sockaddr_in get_addr_info(char* IP, int port) {
     struct sockaddr_in sockServerAddr;
 
     memset(&sockServerAddr, '\0', sizeof(sockServerAddr));
     sockServerAddr.sin_family = AF_INET;
-    sockServerAddr.sin_port = htons(atoi(argv[2]));
-    inet_aton(argv[1], &sockServerAddr.sin_addr);
+    sockServerAddr.sin_port = htons(port);
+    inet_aton(IP, &sockServerAddr.sin_addr);
 
     return sockServerAddr;
 }
 
-int do_socket(int something) {
-    int sock = socket(AF_INET, SOCK_STREAM, something);
+int do_socket() {
+    int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     int yes = 1;
 
     if (sock == -1) {
@@ -84,7 +98,7 @@ int do_socket(int something) {
 }
 
 void do_connect(int sock, struct sockaddr * sockServerAddr) {
-    printf("Connecting to server...");
+    printf("Connecting to client...");
     fflush(stdout);
     if (connect(sock, sockServerAddr, sizeof(struct sockaddr_in)) == -1) {
         perror("\nConnect");
@@ -97,8 +111,7 @@ void do_connect(int sock, struct sockaddr * sockServerAddr) {
 //get user input
 void message_to_send(char * input) {
     memset(input, '\0', strlen(input));
-
-    fgets(input,MAX_BUFFER_SIZE*sizeof(char),stdin);
+    fgets(input, MAX_BUFFER_SIZE*sizeof(char), stdin);
 }
 
 void do_send(char * buffer, int sock) {
@@ -123,7 +136,7 @@ void do_send(char * buffer, int sock) {
 }
 
 void * writeThread(void * args) {
-    struct args arguments = *(struct args *)args;
+    struct threadArgs arguments = *(struct threadArgs *)args;
     char * buffer = arguments.buffer;
     int sock = arguments.sock;
     int * canSend = arguments.canSend;
@@ -132,53 +145,62 @@ void * writeThread(void * args) {
 
     while(1) {
         message_to_send(buffer);
-        if (!strncmp(buffer, "/send ", 6)) {
 
+        if (!strncmp(buffer, "/send ", 6)) {
             char * path = malloc(MAX_BUFFER_SIZE);
-            //sscanf(buffer, "/send %s %s", NULL, path);
-            FILE * toSend = fopen("fichier.txt", "r");
+            char * username = malloc(MAX_USERNAME);
+
+            sscanf(buffer, "/send %s %s", username, path);
+            FILE * toSend = fopen(path, "r");
+
             if (toSend != NULL) {
-                int sockP2P = do_socket(IPPROTO_TCP);
+                int sockP2P = do_socket();
                 struct sockaddr_in sockAddr = init_P2P_addr();
                 do_bind(sockP2P, sockAddr);
                 do_listen(sockP2P);
-                sprintf(buffer, "%s %i", buffer, sockAddr.sin_port);
+                sprintf(buffer, "%s %i", buffer, ntohs(sockAddr.sin_port));
                 do_send(buffer, sock);
 
                 pthread_mutex_lock(lock);
                 while(*canSend == 0) {
                     pthread_cond_wait(cond, lock);
                 }
-                /*
+
                 if (*canSend == 1) {
-                    do_accept()
-                    do_send(fileName);
-                    do_send(file);
+                    int wrSockP2P = do_accept(sockP2P, sockAddr);
+
+                    char * filename = getFilename(path);
+                    fseek(toSend, 0, SEEK_END);
+                    int fileSize = ftell(toSend);
+                    rewind(toSend);
+
+                    char * file2Send = malloc((fileSize + strlen(filename))*sizeof(char)+2);
+                    char * file = malloc(fileSize*sizeof(char));
+
+                    fread(file, sizeof(char), fileSize, toSend);
+
+                    sprintf(file2Send, "%s %s", filename, file);
+
+                    do_send(file2Send, wrSockP2P);
+
+                    free(file2Send);
+
                 }
-                */
                 *canSend = 0;
                 pthread_mutex_unlock(lock);
 
                 close(sockP2P);
+            } else {
+                printf("The file does not exist\n");
+                fflush(stdout);
             }
         } else {
             do_send(buffer, sock);
         }
 
         if (!strcmp(buffer, "/quit\n")) {
-            //pthread_join(sdFile, NULL);
             return NULL;
         }
-
-            //verifier que le fichier existe
-            //creer la socket
-            //bind et listen
-            //envoyer la requete send pour verification plus adresse et IP
-            //attendre que le serveur dise que c'est bon (avec une condition puis remettre la cond a 0)
-            //si oui envoyer le port et l'adresse IP
-            //faire un accept
-            //envoyer la fichier et fermer la socket
-
     }
     return NULL;
 }
@@ -203,7 +225,7 @@ void do_receive(int sock, char * buffer) {
 }
 
 void * readThread(void * args) {
-    struct args arguments = *(struct args *)args;
+    struct threadArgs arguments = *(struct threadArgs *)args;
     char * buffer = arguments.buffer;
     int sock = arguments.sock;
     int * canSend = arguments.canSend;
@@ -235,7 +257,8 @@ void * readThread(void * args) {
             sscanf(buffer,"[SERVER] : /sendCheck %s", desc);
 
             pthread_mutex_lock(lock);
-            if(!strcmp(buffer, "ok")) {
+            //strcmp(desc, "ok")==0 ? *canSend = YES : *canSend = NO;
+            if(!strcmp(desc, "ok")) {
                 *canSend = 1;
             }
             else {
@@ -243,28 +266,45 @@ void * readThread(void * args) {
             }
             pthread_cond_signal(cond);
             pthread_mutex_unlock(lock);
-            // c'est là qu'il faut modifier la variable de condition
-            //recuperer desc
-            //modifier la variable peut envoyer et le signaler
         }
-        else if (!strncmp(buffer, "[SERVER] : /rcvFile ", 20)) {
-            memset(desc, '\0', strlen(desc));
-            /*
-            sscanf(desc,"%s %i", IP, portP2P);
+        else if (!strncmp(buffer, "[SERVER] : /recvFile ", 20)) {
 
-            get_addr_info();
+            char * IP = malloc(15*sizeof(char));
+            int portP2P;
+
+            sscanf(buffer,"[SERVER] : /recvFile %s %i", IP, &portP2P);
+            struct sockaddr_in sockAddrP2P = get_addr_info(IP, portP2P);
             int sockP2P = do_socket();
-            do_connect();
-            do_receive(fileName); //nom du fichier
-            do_receive(file);// fichier
+            do_connect(sockP2P, (struct sockaddr * )&sockAddrP2P);
+
+
+            char * fileReceived = malloc(200);
+            do_receive(sockP2P, fileReceived); //nom du fichier
+
+            char * filename = malloc(100);
+            sscanf(fileReceived, "%s ", filename);
+            char * file = &fileReceived[strlen(filename)+1];
+
+            printf("filename %s\n", filename);
+            fflush(stdout);
+            printf("file %s\n", file);
+            fflush(stdout);
+
+
+            char * path = malloc((strlen(INBOX_DIR)+strlen(filename) + 1)*sizeof(char));
+            sprintf(path, "%s/%s", INBOX_DIR, filename);
+            FILE * toSave = fopen(path, "a");
+            fprintf(toSave, "%s", file);
+            fclose(toSave);
+            /*
             save_file();
-            close(sockP2P);
             */
-            //recuperer desc
-            //ouvrir une socket
-            //se connecter
-            //recevoir et enregistrer le fichier
-            //fermer la socket
+
+
+            printf("%s saved in %s\n", filename, INBOX_DIR);
+            fflush(stdout);
+
+            close(sockP2P);
         }
     }
     return NULL;
@@ -281,8 +321,8 @@ int main(int argc,char** argv) {
         fflush(stdout);
     }
 
-    struct sockaddr_in sockServerAddr = get_addr_info(argv);
-    int sock = do_socket(0);
+    struct sockaddr_in sockServerAddr = get_addr_info(argv[1], atoi(argv[2]));
+    int sock = do_socket();
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
@@ -297,27 +337,12 @@ int main(int argc,char** argv) {
     pthread_t rdThread;
     pthread_t wrThread;
 
-    struct args arguments = {sock, buffer, &canSend, &cond, &lock};
+    struct threadArgs args = {sock, buffer, &canSend, &cond, &lock};
 
-    pthread_create(&rdThread, NULL, readThread, (void *)&arguments);
-    pthread_create(&wrThread, NULL, writeThread, (void *)&arguments);
+    pthread_create(&rdThread, NULL, readThread, (void *)&args);
+    pthread_create(&wrThread, NULL, writeThread, (void *)&args);
 
     pthread_join(rdThread, NULL);
 
     return 0;
 }
-
-/*
-void * sendFile(void * args) {
-    struct args arguments = *(struct args2 *)args;
-
-    char * buffer = arguments.buffer;
-    int sock = arguments.sock;
-
-    wrSock = accept(); //appel bloquant normalement
-    fopen(file);
-    read(file); dans le buffer
-    do_send(buffer, wrSock)
-    return NULL;
-}
-*/

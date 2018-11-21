@@ -7,6 +7,8 @@ find_package (Threads)
 #add here source files you need to compile and link to the client app
 SET(SRC_CLIENT
 	client.c
+	P2P.c
+	socketSetup.c
 	)
 
 
@@ -19,6 +21,8 @@ SET(SRC_SERVER
 	channels.c
 	users.c
 	serverFunctions.c
+	P2P.c
+	socketSetup.c
     server.c)
 
 

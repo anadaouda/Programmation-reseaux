@@ -1,1 +1,1 @@
-/usr/bin/cc  -g   CMakeFiles/RE216_CLIENT.dir/client.c.o  -o RE216_CLIENT -rdynamic -lpthread 
+/usr/bin/cc  -g   CMakeFiles/RE216_CLIENT.dir/client.c.o CMakeFiles/RE216_CLIENT.dir/P2P.c.o CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o  -o RE216_CLIENT -rdynamic -lpthread 

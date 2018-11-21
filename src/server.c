@@ -22,30 +22,23 @@ int main(int argc, char** argv) {
         printf("usage: RE216_SERVER %s\n", argv[1]);
         fflush(stdout);
     }
-    //create the socket, check for validity!
+
+    //Setting up the socket
     int sockServer = do_socket();
-
-    //init the serv_add structure
     struct sockaddr_in sockAddr = init_serv_addr(argv);
-
-    //perform the binding
-    //we bind on the tcp port specified
     do_bind(sockServer, sockAddr);
-
-    //specify the socket to be a server socket and listen for at most 20 concurrent client
     do_listen(sockServer);
 
+    //Setting up the pollfd structure
     struct pollfd structPollFd[MAX_FD + 1];
     memset(structPollFd, '\0', sizeof(struct pollfd)*(MAX_FD + 1));
     structPollFd[0].fd = sockServer;
     structPollFd[0].events = POLLIN;
 
+    //Setting up variables
     struct userInfo * users = createUsers();
     struct channelInfo * channels = createChannel();
-
-    int rdwrSock;
-    int i;
-    int resPoll;
+    int rdwrSock, i, resPoll;
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
     struct userInfo * currentUser = createUsers();
     struct channelInfo * currentChannel = createChannel();
@@ -53,7 +46,7 @@ int main(int argc, char** argv) {
     char * channelName = malloc(MAX_CHANNEL_NAME);
     char * message = malloc(MAX_BUFFER_SIZE);
     char * path = malloc(MAX_BUFFER_SIZE);
-    int portP2P;
+    char * command = malloc(50);
 
     while(1) {
         resPoll = poll(structPollFd, MAX_FD + 1, -1);
@@ -68,87 +61,39 @@ int main(int argc, char** argv) {
                 perror("Poll");
                 exit(EXIT_FAILURE);
             }
-            else {
-                //accept connection from client
+            else { //accept connection from client
                 rdwrSock = do_accept(sockServer, sockAddr);
                 i = spacePollFd(structPollFd);
                 structPollFd[i].fd = rdwrSock;
                 structPollFd[i].events = POLLIN;
-                newUser(users, i, inet_ntoa(sockAddr.sin_addr), sockAddr.sin_port);
+                newUser(users, i, inet_ntoa(sockAddr.sin_addr), ntohs(sockAddr.sin_port));
                 do_send(structPollFd[i].fd, "Please logon with /nick <your pseudo>", "SERVER");
 
             }
         }
         else {
-            //goes through the pollfd table to send and receive data
             for (i = 1; i < MAX_FD + 1; i++) {
                 if (structPollFd[i].revents == POLLIN) {
                     currentUser = searchByIndex(users, i);
-                    if ((getLoggedIn(currentUser) == 1)&&(isInChannel(currentUser) == -1)&&(confirmedP2P(currentUser)==0)) {
-                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
-                        if (!strncmp(buffer, "/whois ", 7)) {
-                            memset(username, '0', MAX_USERNAME);
-                            sscanf(buffer, "/whois %s", username);
-                            whois(buffer, username, users);
+                    if ((isLoggedIn(currentUser) == YES) && (isInChannel(currentUser) == NO) && (isInP2P(currentUser) == NO)) {
+                        do_receive(structPollFd[i].fd, sockServer, buffer);
+                        sscanf(buffer, "%s", command);
+                        if (!strcmp(command, "/whois" )) { whois(buffer, users);}
+                        else if (!strcmp(command, "/who" )) { who(buffer, users,-1);}
+                        else if (!strcmp(command, "/channellist" )) { channelList(buffer, channels);}
+                        else if (!strcmp(command, "/nick" )) { nick(buffer, users, currentUser);}
+                        else if (!strcmp(command, "/msgall" )) { msgall(buffer, currentUser, users, structPollFd, -1);}
+                        else if (!strcmp(command, "/msg" )) { msg(currentUser, users, structPollFd, buffer);}
+                        else if (!strcmp(command, "/createchannel" )) { newChannel(channels, buffer);}
+                        else if (!strcmp(command, "/join" )) { join(channels, currentUser, users,buffer);}
+                        else if (!strcmp(command, "/quit" )) { quit(buffer, &structPollFd[i], i, users);}
+                        else if (!strcmp(command, "/sendCheck" )) { sendCheck(structPollFd, buffer, users, currentUser);}
+                        if (strcmp(buffer, "")) {
+                            do_send(structPollFd[i].fd, buffer, "SERVER");
+                        }
 
-                        }
-                        else if (!strncmp(buffer, "/who\n", 5)) {
-                            who(buffer, users,-1);
-                        }
-                        else if (!strncmp(buffer, "/channellist\n", 13)) {
-                            channelList(buffer, channels);
-                        }
-                        else if (!strncmp(buffer, "/nick ", 6)) {
-                            memset(username, '0', MAX_USERNAME);
-                            sscanf(buffer, "/nick %s", username);
-                            nick(buffer, users, username, currentUser);
-                        }
-                        else if (!strncmp(buffer, "/msgall ", 8)) {
-                            memset(message, '0', MAX_BUFFER_SIZE);
-                            sscanf(buffer, "/msgall %[^\n]s", message);
-                            msgall(currentUser, message, users, structPollFd, -1);
-                            break;
-                        }
-                        else if (!strncmp(buffer, "/msg ", 5)) {
-                            memset(username, '0', MAX_USERNAME);
-                            memset(message, '0', MAX_BUFFER_SIZE);
-                            sscanf(buffer, "/msg %s %[^\n]s", username, message);
-                            if (msg(currentUser,username, message, users, structPollFd, buffer)) {
-                                break;
-                            }
-                        }
-                        else if (!strncmp(buffer, "/createchannel ", 15)) {
-                            memset(channelName, '0', MAX_CHANNEL_NAME);
-                            sscanf(buffer, "/createchannel %s", channelName);
-                            newChannel(channels, channelName, buffer);
-                        }
-                        else if (!strncmp(buffer, "/join ", 6)) {
-                            memset(channelName, '0', MAX_CHANNEL_NAME);
-                            sscanf(buffer, "/join %s", channelName);
-                            join(channels, channelName, currentUser, users,buffer);
-                        }
-                        else if (!strcmp(buffer, "/quit\n")) {
-                            quit(buffer, &structPollFd[i], i, users);
-                            break;
-                        }
-                        else if (!strncmp(buffer, "/send ", 6)) {
-                            memset(username, '0', MAX_USERNAME);
-                            sscanf(buffer, "/send %s %i", username, &portP2P);
-                            //creer une fonction checkArgs(buffer, nbArgs);
-                            sendCheck(structPollFd, buffer, users, username, currentUser, portP2P);
-                        }
-                        /*
-                        else if cest une commande send il faut verifier que le user existe
-                            si oui envouer /send userClear et changer la variable accepted share du recepteur à l'index de l'expediteur?
-                            mettre @IP et port
-                            envoyer au recepteur y ou n
-                            sinon envoyer error
-                            break
-                        */
-                        do_send(structPollFd[i].fd, buffer, "SERVER");
-
-                    } else if (getLoggedIn(currentUser)==-1) { //if client is not connected
-                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
+                    } else if (isLoggedIn(currentUser)==-1) { //if client is not connected
+                        do_receive(structPollFd[i].fd, sockServer, buffer);
                         if (!strcmp(buffer, "/quit\n")) {
                             quit(buffer, &structPollFd[i], i, users);
                             break;
@@ -156,41 +101,49 @@ int main(int argc, char** argv) {
                         loggedIn(buffer, users, structPollFd[i].fd, currentUser);
                         do_send(structPollFd[i].fd, buffer, "SERVER");
                     }
-                    else if (confirmedP2P(currentUser) != 0) {
-                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
+                    else if (isInP2P(currentUser) != NO) {
+                        do_receive(structPollFd[i].fd, sockServer, buffer);
+                        char * confirm = malloc(100);
                         if((!strcmp(buffer, "y\n"))||(!strcmp(buffer, "Y\n"))) {
-                            struct userInfo * sender = searchByIndex(users, confirmedP2P(currentUser));
-                            do_send(structPollFd[confirmedP2P(currentUser)].fd, "machin accepted the transfer", "SERVER");
+                            struct userInfo * sender = searchByIndex(users, isInP2P(currentUser));
+                            sprintf(confirm, "%s accepted the transfert", getUsername(currentUser));
+                            do_send(structPollFd[isInP2P(currentUser)].fd, confirm, "SERVER");
                             sprintf(buffer, "/recvFile %s %i", getIP(sender), getPortP2P(sender));
                             do_send(structPollFd[i].fd, buffer, "SERVER");
                         } else if((!strcmp(buffer, "n\n"))||(!strcmp(buffer, "N\n"))) {
-                            do_send(structPollFd[confirmedP2P(currentUser)].fd, "machin said fuck you", "SERVER");
+                            sprintf(confirm, "%s cancelled file transfert", getUsername(currentUser));
+                            do_send(structPollFd[isInP2P(currentUser)].fd, confirm, "SERVER");
                         }
-                        setP2P(currentUser, 0);
+                        setP2P(currentUser, NO);
+                        free(confirm);
                     }
 
-                    else if (isInChannel(currentUser) != -1) { //if client is in a channel
+                    else if (isInChannel(currentUser) != NO) { //if client is in a channel
                         currentChannel = searchChannelByIndex(channels,isInChannel(currentUser));
-                        do_receive(structPollFd[i].fd, sockServer, buffer, structPollFd);
+                        do_receive(structPollFd[i].fd, sockServer, buffer);
 
                         if (!strncmp(buffer, "/quit ", 6)) {
-                            memset(channelName, '0', MAX_CHANNEL_NAME);
-                            sscanf(buffer, "/quit %s", channelName);
-                            quitChannel(channels, channelName, currentUser, buffer);
+                            quitChannel(channels,currentUser, buffer);
                         }
                         else if (!strncmp(buffer, "/who\n", 5)) {
                             who(buffer, users, isInChannel(currentUser));
                         }
+                        else if (!strcmp(buffer, "/quit\n")) {
+                            quit(buffer, &structPollFd[i], i, users);
+                            break;
+                        }
                         else {
-                            msgall(currentUser, buffer, users, structPollFd, isInChannel(currentUser));
+
+                            msgall(buffer,currentUser, users, structPollFd, isInChannel(currentUser));
                             break;
                         }
 
                         do_send(structPollFd[i].fd, buffer, "SERVER");
                     }
                 }
+            }
         }
-    }
 }
+
     return 0;
 }

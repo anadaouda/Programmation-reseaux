@@ -1,4 +1,4 @@
-# Install script for directory: /home/ana/Documents/S7/ProjetRes/src/header
+# Install script for directory: /home/ana/Documents/S7/Programmation réseaux/src/header
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -15,7 +15,6 @@
 #include "header/constant.h"
 #include "header/channels.h"
 
-// creates the listening socket
 int do_socket() {
     int sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     int yes = 1;
@@ -97,7 +96,7 @@ void do_send(int rdwrSock, char * buffer, char * who) {
 
 
 
-void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[]) {
+void do_receive(int rdwrSock, int sockServer, char * buffer) {
     memset(buffer, '\0', MAX_BUFFER_SIZE);
 
     int strReceived, strSizeToReceive;
@@ -119,6 +118,7 @@ void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd struc
     } while (strReceived != strSizeToReceive);
 
     printf("[%i] : %s\n",rdwrSock, buffer);
+    fflush(stdout);
 }
 
 // returns the index of an availabla space in the pollfd table
@@ -153,46 +153,61 @@ void quit(char * buffer, struct pollfd * structPollFd, int i, struct userInfo * 
     deleteUser(i, users);
 }
 
-void msgall(struct userInfo * sender, char * message, struct userInfo * users, struct pollfd structPollFd[], int channelIndex) {
+void msgall(char * buffer, struct userInfo * sender, struct userInfo * users, struct pollfd structPollFd[], int channelIndex) {
+    char * message = malloc(MAX_BUFFER_SIZE);
+
     struct userInfo * current = users;
 
     if (channelIndex == -1) {
+        sscanf(buffer, "/msgall %[^\n]s", message);
         while(current != NULL) {
-            if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))) {
+            if ((isLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))) {
                 do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
             }
             current = getNext(current);
         }
     } else {
         while(current != NULL) {
-            if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))&&(isInChannel(current) == channelIndex)) {
-                do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
+            if ((isLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))&&(isInChannel(current) == channelIndex)) {
+                do_send(structPollFd[getIndex(current)].fd, buffer, getUsername(sender));
             }
             current = getNext(current);
         }
     }
 }
 
-int msg(struct userInfo * sender, char * username, char * message, struct userInfo * users, struct pollfd structPollFd[], char * buffer) {
-    int err = 0;
+void msg(struct userInfo * sender, struct userInfo * users, struct pollfd structPollFd[], char * buffer) {
+    char * message = malloc(MAX_BUFFER_SIZE);
+    char * username = malloc(MAX_USERNAME);
+    sscanf(buffer, "/msg %s %[^\n]s", username, message);
+
     struct userInfo * receiver = searchByUsername(users, username);
+
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
     if (receiver != NULL) {
         do_send(structPollFd[getIndex(receiver)].fd, message, getUsername(sender));
-        err++;
+        sprintf(buffer, "%s", "");
     } else {
         sprintf(buffer, "L'utilisateur '%s' n'existe pas ou n'est pas connecte\n",username);
     }
-    return err;
 }
 
-void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * users, char * username, struct userInfo * sender, int portP2P) {
+void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * users, struct userInfo * sender) {
+    char * filename = malloc(50);
+    char * path = malloc(MAX_BUFFER_SIZE);
+    char * username = malloc(MAX_USERNAME);
+    int portP2P;
+    sscanf(buffer, "/send %s %s %i", username, path, &portP2P);
+
     struct userInfo * exist = searchByUsername(users, username);
 
     memset(buffer, '\0', MAX_BUFFER_SIZE);
     if ((exist != NULL)&&(exist != sender)) {
         setP2P(exist, getIndex(sender));
         setPortP2P(sender,portP2P);
-        do_send(structPollFd[getIndex(exist)].fd, "user1 wants you to accept the transfer of the file named 'file.txt'. Do you accept? [Y/n]", "SERVER");
+        char * confirm = malloc(100);
+        sprintf(confirm, "%s wants you to accept the transfer of the file named '%s'. Do you accept? [Y/n]", username, filename);
+        do_send(structPollFd[getIndex(exist)].fd, confirm, "SERVER");
         sprintf(buffer,"%s", "/sendCheck ok");
     } else {
         sprintf(buffer, "%s", "/sendCheck error");

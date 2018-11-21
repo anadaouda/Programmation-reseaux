@@ -6,7 +6,6 @@
 #include "header/constant.h"
 #include "header/users.h"
 
-//C'est juste un test
 struct channelInfo {
     int index;
     int nbUsers;
@@ -67,7 +66,10 @@ struct channelInfo * searchChannelByIndex(struct channelInfo * channel, int inde
     return current;
 }
 
-void newChannel(struct channelInfo * channels, char * name, char * buffer) {
+void newChannel(struct channelInfo * channels, char * buffer) {
+    char * name = malloc(MAX_CHANNEL_NAME);
+    sscanf(buffer, "/createchannel %s", name);
+
     struct channelInfo * verification = searchByChannelName(channels, name);
 
     if (verification == NULL) {
@@ -106,7 +108,10 @@ void deleteChannel(int index, struct channelInfo * channel) {
     }
 }
 
-void join(struct channelInfo * channels, char * name, struct userInfo * user,struct userInfo * users, char * buffer) {
+void join(struct channelInfo * channels, struct userInfo * user,struct userInfo * users, char * buffer) {
+    char * name = malloc(MAX_CHANNEL_NAME);
+    sscanf(buffer, "/join %s", name);
+
     struct channelInfo * channel = searchByChannelName(channels, name);
     if (channel != NULL) {
         setChannel(user, channel->index);
@@ -118,8 +123,12 @@ void join(struct channelInfo * channels, char * name, struct userInfo * user,str
     }
 }
 
-void quitChannel(struct channelInfo * channels, char * name, struct userInfo * user, char * buffer) {
+void quitChannel(struct channelInfo * channels, struct userInfo * user, char * buffer) {
+    char * name = malloc(MAX_CHANNEL_NAME);
+    sscanf(buffer, "/quit %s", name);
+
     struct channelInfo * channel = searchByChannelName(channels, name);
+
     if ((channel !=NULL)&&(getChannelIndex(channel) == isInChannel(user))) {
         setChannel(user, -1);
         channel->nbUsers--;
@@ -134,6 +143,8 @@ void quitChannel(struct channelInfo * channels, char * name, struct userInfo * u
     else {
         sprintf(buffer, "You are not in this channel\n");
     }
+
+    free(name);
 }
 
 void channelList(char * buffer, struct channelInfo * channels) {

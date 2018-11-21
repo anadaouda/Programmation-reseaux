@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/RE216_CLIENT.dir/client.c.o"
+  "CMakeFiles/RE216_CLIENT.dir/P2P.c.o"
+  "CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o"
   "RE216_CLIENT.pdb"
   "RE216_CLIENT"
 )

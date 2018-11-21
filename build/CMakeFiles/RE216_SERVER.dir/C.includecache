@@ -6,7 +6,43 @@
 
 #IncludeRegexTransform: 
 
-/home/ana/Documents/S7/ProjetRes/src/channels.c
+/home/ana/Documents/S7/Programmation réseaux/src/P2P.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+arpa/inet.h
+-
+limits.h
+-
+poll.h
+-
+time.h
+-
+netdb.h
+-
+pthread.h
+-
+header/users.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/users.h
+header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
+header/channels.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/channels.h
+header/socketSetup.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/socketSetup.h
+
+/home/ana/Documents/S7/Programmation réseaux/src/channels.c
 stdio.h
 -
 stdlib.h
@@ -16,19 +52,21 @@ string.h
 unistd.h
 -
 header/constant.h
-/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 header/users.h
-/home/ana/Documents/S7/ProjetRes/src/header/users.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/users.h
 
-/home/ana/Documents/S7/ProjetRes/src/header/channels.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/channels.h
 
-/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 
-/home/ana/Documents/S7/ProjetRes/src/header/serverFunctions.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/serverFunctions.h
 
-/home/ana/Documents/S7/ProjetRes/src/header/users.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/socketSetup.h
 
-/home/ana/Documents/S7/ProjetRes/src/server.c
+/home/ana/Documents/S7/Programmation réseaux/src/header/users.h
+
+/home/ana/Documents/S7/Programmation réseaux/src/server.c
 stdio.h
 -
 stdlib.h
@@ -48,15 +86,15 @@ poll.h
 time.h
 -
 header/users.h
-/home/ana/Documents/S7/ProjetRes/src/header/users.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/users.h
 header/constant.h
-/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 header/channels.h
-/home/ana/Documents/S7/ProjetRes/src/header/channels.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/channels.h
 header/serverFunctions.h
-/home/ana/Documents/S7/ProjetRes/src/header/serverFunctions.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/serverFunctions.h
 
-/home/ana/Documents/S7/ProjetRes/src/serverFunctions.c
+/home/ana/Documents/S7/Programmation réseaux/src/serverFunctions.c
 stdio.h
 -
 stdlib.h
@@ -82,13 +120,41 @@ time.h
 netdb.h
 -
 header/users.h
-/home/ana/Documents/S7/ProjetRes/src/header/users.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/users.h
 header/constant.h
-/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 header/channels.h
-/home/ana/Documents/S7/ProjetRes/src/header/channels.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/channels.h
 
-/home/ana/Documents/S7/ProjetRes/src/users.c
+/home/ana/Documents/S7/Programmation réseaux/src/socketSetup.c
+stdlib.h
+-
+unistd.h
+-
+stdio.h
+-
+string.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netdb.h
+-
+netinet/in.h
+-
+arpa/inet.h
+-
+limits.h
+-
+time.h
+-
+pthread.h
+-
+header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
+
+/home/ana/Documents/S7/Programmation réseaux/src/users.c
 stdio.h
 -
 stdlib.h
@@ -98,5 +164,5 @@ string.h
 time.h
 -
 header/constant.h
-/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+/home/ana/Documents/S7/Programmation réseaux/src/header/constant.h
 
