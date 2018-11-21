@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ana/Documents/S7/ProjetRes/src/client.c
+stdlib.h
+-
+unistd.h
+-
+stdio.h
+-
+string.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netdb.h
+-
+netinet/in.h
+-
+arpa/inet.h
+-
+limits.h
+-
+time.h
+-
+pthread.h
+-
+header/constant.h
+/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+
+/home/ana/Documents/S7/ProjetRes/src/header/constant.h
+
