@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 /usr/bin/cc  -g   CMakeFiles/RE216_SERVER.dir/channels.c.o CMakeFiles/RE216_SERVER.dir/users.c.o CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o CMakeFiles/RE216_SERVER.dir/P2P.c.o CMakeFiles/RE216_SERVER.dir/socketSetup.c.o CMakeFiles/RE216_SERVER.dir/server.c.o  -o RE216_SERVER -rdynamic 
+=======
+/usr/bin/cc  -g   CMakeFiles/RE216_SERVER.dir/channels.c.o CMakeFiles/RE216_SERVER.dir/users.c.o CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o CMakeFiles/RE216_SERVER.dir/server.c.o  -o RE216_SERVER -rdynamic 
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82

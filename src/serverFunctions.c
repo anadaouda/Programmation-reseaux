@@ -15,6 +15,10 @@
 #include "header/constant.h"
 #include "header/channels.h"
 
+<<<<<<< HEAD
+=======
+// creates the listening socket
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 int do_socket() {
     int sockServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     int yes = 1;
@@ -96,7 +100,11 @@ void do_send(int rdwrSock, char * buffer, char * who) {
 
 
 
+<<<<<<< HEAD
 void do_receive(int rdwrSock, int sockServer, char * buffer) {
+=======
+void do_receive(int rdwrSock, int sockServer, char * buffer, struct pollfd structPollFd[]) {
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     memset(buffer, '\0', MAX_BUFFER_SIZE);
 
     int strReceived, strSizeToReceive;
@@ -118,7 +126,10 @@ void do_receive(int rdwrSock, int sockServer, char * buffer) {
     } while (strReceived != strSizeToReceive);
 
     printf("[%i] : %s\n",rdwrSock, buffer);
+<<<<<<< HEAD
     fflush(stdout);
+=======
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 }
 
 // returns the index of an availabla space in the pollfd table
@@ -153,6 +164,7 @@ void quit(char * buffer, struct pollfd * structPollFd, int i, struct userInfo * 
     deleteUser(i, users);
 }
 
+<<<<<<< HEAD
 void msgall(char * buffer, struct userInfo * sender, struct userInfo * users, struct pollfd structPollFd[], int channelIndex) {
     char * message = malloc(MAX_BUFFER_SIZE);
 
@@ -162,20 +174,34 @@ void msgall(char * buffer, struct userInfo * sender, struct userInfo * users, st
         sscanf(buffer, "/msgall %[^\n]s", message);
         while(current != NULL) {
             if ((isLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))) {
+=======
+void msgall(struct userInfo * sender, char * message, struct userInfo * users, struct pollfd structPollFd[], int channelIndex) {
+    struct userInfo * current = users;
+
+    if (channelIndex == -1) {
+        while(current != NULL) {
+            if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))) {
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
                 do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
             }
             current = getNext(current);
         }
     } else {
         while(current != NULL) {
+<<<<<<< HEAD
             if ((isLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))&&(isInChannel(current) == channelIndex)) {
                 do_send(structPollFd[getIndex(current)].fd, buffer, getUsername(sender));
+=======
+            if ((getLoggedIn(current) == 1)&&(getIndex(current) != getIndex(sender))&&(isInChannel(current) == channelIndex)) {
+                do_send(structPollFd[getIndex(current)].fd, message, getUsername(sender));
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
             }
             current = getNext(current);
         }
     }
 }
 
+<<<<<<< HEAD
 void msg(struct userInfo * sender, struct userInfo * users, struct pollfd structPollFd[], char * buffer) {
     char * message = malloc(MAX_BUFFER_SIZE);
     char * username = malloc(MAX_USERNAME);
@@ -199,15 +225,34 @@ void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * us
     int portP2P;
     sscanf(buffer, "/send %s %s %i", username, path, &portP2P);
 
+=======
+int msg(struct userInfo * sender, char * username, char * message, struct userInfo * users, struct pollfd structPollFd[], char * buffer) {
+    int err = 0;
+    struct userInfo * receiver = searchByUsername(users, username);
+    if (receiver != NULL) {
+        do_send(structPollFd[getIndex(receiver)].fd, message, getUsername(sender));
+        err++;
+    } else {
+        sprintf(buffer, "L'utilisateur '%s' n'existe pas ou n'est pas connecte\n",username);
+    }
+    return err;
+}
+
+void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * users, char * username, struct userInfo * sender, int portP2P) {
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     struct userInfo * exist = searchByUsername(users, username);
 
     memset(buffer, '\0', MAX_BUFFER_SIZE);
     if ((exist != NULL)&&(exist != sender)) {
         setP2P(exist, getIndex(sender));
         setPortP2P(sender,portP2P);
+<<<<<<< HEAD
         char * confirm = malloc(100);
         sprintf(confirm, "%s wants you to accept the transfer of the file named '%s'. Do you accept? [Y/n]", username, filename);
         do_send(structPollFd[getIndex(exist)].fd, confirm, "SERVER");
+=======
+        do_send(structPollFd[getIndex(exist)].fd, "user1 wants you to accept the transfer of the file named 'file.txt'. Do you accept? [Y/n]", "SERVER");
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
         sprintf(buffer,"%s", "/sendCheck ok");
     } else {
         sprintf(buffer, "%s", "/sendCheck error");

@@ -136,6 +136,7 @@ RE216_CLIENT/fast:
 	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/build
 .PHONY : RE216_CLIENT/fast
 
+<<<<<<< HEAD
 P2P.o: P2P.c.o
 
 .PHONY : P2P.o
@@ -166,6 +167,8 @@ P2P.c.s:
 	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/P2P.c.s
 .PHONY : P2P.c.s
 
+=======
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 channels.o: channels.c.o
 
 .PHONY : channels.o
@@ -274,6 +277,7 @@ serverFunctions.c.s:
 	$(MAKE) -f CMakeFiles/RE216_SERVER.dir/build.make CMakeFiles/RE216_SERVER.dir/serverFunctions.c.s
 .PHONY : serverFunctions.c.s
 
+<<<<<<< HEAD
 socketSetup.o: socketSetup.c.o
 
 .PHONY : socketSetup.o
@@ -304,6 +308,8 @@ socketSetup.c.s:
 	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/socketSetup.c.s
 .PHONY : socketSetup.c.s
 
+=======
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 users.o: users.c.o
 
 .PHONY : users.o
@@ -341,9 +347,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... RE216_SERVER"
 	@echo "... RE216_CLIENT"
+<<<<<<< HEAD
 	@echo "... P2P.o"
 	@echo "... P2P.i"
 	@echo "... P2P.s"
+=======
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 	@echo "... channels.o"
 	@echo "... channels.i"
 	@echo "... channels.s"
@@ -356,9 +365,12 @@ help:
 	@echo "... serverFunctions.o"
 	@echo "... serverFunctions.i"
 	@echo "... serverFunctions.s"
+<<<<<<< HEAD
 	@echo "... socketSetup.o"
 	@echo "... socketSetup.i"
 	@echo "... socketSetup.s"
+=======
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 	@echo "... users.o"
 	@echo "... users.i"
 	@echo "... users.s"

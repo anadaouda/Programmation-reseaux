@@ -13,6 +13,7 @@
 
 #include "header/constant.h"
 
+<<<<<<< HEAD
 char * getFilename(char * path) {
     int i, j;
     char * result = malloc(strlen(path));
@@ -29,6 +30,10 @@ char * getFilename(char * path) {
 
 
 struct threadArgs {
+=======
+
+struct args {
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     int sock;
     char * buffer;
     int * canSend;
@@ -71,19 +76,33 @@ int do_accept(int sockP2P, struct sockaddr_in sockAddr) {
     return rdwrSock;
 }
 
+<<<<<<< HEAD
 struct sockaddr_in get_addr_info(char* IP, int port) {
+=======
+struct sockaddr_in get_addr_info(char** argv) {
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     struct sockaddr_in sockServerAddr;
 
     memset(&sockServerAddr, '\0', sizeof(sockServerAddr));
     sockServerAddr.sin_family = AF_INET;
+<<<<<<< HEAD
     sockServerAddr.sin_port = htons(port);
     inet_aton(IP, &sockServerAddr.sin_addr);
+=======
+    sockServerAddr.sin_port = htons(atoi(argv[2]));
+    inet_aton(argv[1], &sockServerAddr.sin_addr);
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 
     return sockServerAddr;
 }
 
+<<<<<<< HEAD
 int do_socket() {
     int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+=======
+int do_socket(int something) {
+    int sock = socket(AF_INET, SOCK_STREAM, something);
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     int yes = 1;
 
     if (sock == -1) {
@@ -98,7 +117,11 @@ int do_socket() {
 }
 
 void do_connect(int sock, struct sockaddr * sockServerAddr) {
+<<<<<<< HEAD
     printf("Connecting to client...");
+=======
+    printf("Connecting to server...");
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     fflush(stdout);
     if (connect(sock, sockServerAddr, sizeof(struct sockaddr_in)) == -1) {
         perror("\nConnect");
@@ -111,7 +134,12 @@ void do_connect(int sock, struct sockaddr * sockServerAddr) {
 //get user input
 void message_to_send(char * input) {
     memset(input, '\0', strlen(input));
+<<<<<<< HEAD
     fgets(input, MAX_BUFFER_SIZE*sizeof(char), stdin);
+=======
+
+    fgets(input,MAX_BUFFER_SIZE*sizeof(char),stdin);
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 }
 
 void do_send(char * buffer, int sock) {
@@ -136,7 +164,11 @@ void do_send(char * buffer, int sock) {
 }
 
 void * writeThread(void * args) {
+<<<<<<< HEAD
     struct threadArgs arguments = *(struct threadArgs *)args;
+=======
+    struct args arguments = *(struct args *)args;
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     char * buffer = arguments.buffer;
     int sock = arguments.sock;
     int * canSend = arguments.canSend;
@@ -145,6 +177,7 @@ void * writeThread(void * args) {
 
     while(1) {
         message_to_send(buffer);
+<<<<<<< HEAD
 
         if (!strncmp(buffer, "/send ", 6)) {
             char * path = malloc(MAX_BUFFER_SIZE);
@@ -159,12 +192,26 @@ void * writeThread(void * args) {
                 do_bind(sockP2P, sockAddr);
                 do_listen(sockP2P);
                 sprintf(buffer, "%s %i", buffer, ntohs(sockAddr.sin_port));
+=======
+        if (!strncmp(buffer, "/send ", 6)) {
+
+            char * path = malloc(MAX_BUFFER_SIZE);
+            //sscanf(buffer, "/send %s %s", NULL, path);
+            FILE * toSend = fopen("fichier.txt", "r");
+            if (toSend != NULL) {
+                int sockP2P = do_socket(IPPROTO_TCP);
+                struct sockaddr_in sockAddr = init_P2P_addr();
+                do_bind(sockP2P, sockAddr);
+                do_listen(sockP2P);
+                sprintf(buffer, "%s %i", buffer, sockAddr.sin_port);
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
                 do_send(buffer, sock);
 
                 pthread_mutex_lock(lock);
                 while(*canSend == 0) {
                     pthread_cond_wait(cond, lock);
                 }
+<<<<<<< HEAD
 
                 if (*canSend == 1) {
                     int wrSockP2P = do_accept(sockP2P, sockAddr);
@@ -186,21 +233,49 @@ void * writeThread(void * args) {
                     free(file2Send);
 
                 }
+=======
+                /*
+                if (*canSend == 1) {
+                    do_accept()
+                    do_send(fileName);
+                    do_send(file);
+                }
+                */
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
                 *canSend = 0;
                 pthread_mutex_unlock(lock);
 
                 close(sockP2P);
+<<<<<<< HEAD
             } else {
                 printf("The file does not exist\n");
                 fflush(stdout);
+=======
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
             }
         } else {
             do_send(buffer, sock);
         }
 
         if (!strcmp(buffer, "/quit\n")) {
+<<<<<<< HEAD
             return NULL;
         }
+=======
+            //pthread_join(sdFile, NULL);
+            return NULL;
+        }
+
+            //verifier que le fichier existe
+            //creer la socket
+            //bind et listen
+            //envoyer la requete send pour verification plus adresse et IP
+            //attendre que le serveur dise que c'est bon (avec une condition puis remettre la cond a 0)
+            //si oui envoyer le port et l'adresse IP
+            //faire un accept
+            //envoyer la fichier et fermer la socket
+
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     }
     return NULL;
 }
@@ -225,7 +300,11 @@ void do_receive(int sock, char * buffer) {
 }
 
 void * readThread(void * args) {
+<<<<<<< HEAD
     struct threadArgs arguments = *(struct threadArgs *)args;
+=======
+    struct args arguments = *(struct args *)args;
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     char * buffer = arguments.buffer;
     int sock = arguments.sock;
     int * canSend = arguments.canSend;
@@ -257,8 +336,12 @@ void * readThread(void * args) {
             sscanf(buffer,"[SERVER] : /sendCheck %s", desc);
 
             pthread_mutex_lock(lock);
+<<<<<<< HEAD
             //strcmp(desc, "ok")==0 ? *canSend = YES : *canSend = NO;
             if(!strcmp(desc, "ok")) {
+=======
+            if(!strcmp(buffer, "ok")) {
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
                 *canSend = 1;
             }
             else {
@@ -266,6 +349,7 @@ void * readThread(void * args) {
             }
             pthread_cond_signal(cond);
             pthread_mutex_unlock(lock);
+<<<<<<< HEAD
         }
         else if (!strncmp(buffer, "[SERVER] : /recvFile ", 20)) {
 
@@ -305,6 +389,30 @@ void * readThread(void * args) {
             fflush(stdout);
 
             close(sockP2P);
+=======
+            // c'est là qu'il faut modifier la variable de condition
+            //recuperer desc
+            //modifier la variable peut envoyer et le signaler
+        }
+        else if (!strncmp(buffer, "[SERVER] : /rcvFile ", 20)) {
+            memset(desc, '\0', strlen(desc));
+            /*
+            sscanf(desc,"%s %i", IP, portP2P);
+
+            get_addr_info();
+            int sockP2P = do_socket();
+            do_connect();
+            do_receive(fileName); //nom du fichier
+            do_receive(file);// fichier
+            save_file();
+            close(sockP2P);
+            */
+            //recuperer desc
+            //ouvrir une socket
+            //se connecter
+            //recevoir et enregistrer le fichier
+            //fermer la socket
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
         }
     }
     return NULL;
@@ -321,8 +429,13 @@ int main(int argc,char** argv) {
         fflush(stdout);
     }
 
+<<<<<<< HEAD
     struct sockaddr_in sockServerAddr = get_addr_info(argv[1], atoi(argv[2]));
     int sock = do_socket();
+=======
+    struct sockaddr_in sockServerAddr = get_addr_info(argv);
+    int sock = do_socket(0);
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
 
@@ -337,12 +450,37 @@ int main(int argc,char** argv) {
     pthread_t rdThread;
     pthread_t wrThread;
 
+<<<<<<< HEAD
     struct threadArgs args = {sock, buffer, &canSend, &cond, &lock};
 
     pthread_create(&rdThread, NULL, readThread, (void *)&args);
     pthread_create(&wrThread, NULL, writeThread, (void *)&args);
+=======
+    struct args arguments = {sock, buffer, &canSend, &cond, &lock};
+
+    pthread_create(&rdThread, NULL, readThread, (void *)&arguments);
+    pthread_create(&wrThread, NULL, writeThread, (void *)&arguments);
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 
     pthread_join(rdThread, NULL);
 
     return 0;
 }
+<<<<<<< HEAD
+=======
+
+/*
+void * sendFile(void * args) {
+    struct args arguments = *(struct args2 *)args;
+
+    char * buffer = arguments.buffer;
+    int sock = arguments.sock;
+
+    wrSock = accept(); //appel bloquant normalement
+    fopen(file);
+    read(file); dans le buffer
+    do_send(buffer, wrSock)
+    return NULL;
+}
+*/
+>>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
