@@ -40,7 +40,13 @@ int nbOpenFd(struct pollfd structPollFd[]) {
     return openFd;
 }
 
-void quit(char * buffer, struct pollfd * structPollFd, int i, struct userInfo * users) {
+void quit(char * buffer, struct pollfd * structPollFd, int i, struct userInfo * users, struct channelInfo * currentChannel, struct userInfo * user, struct channelInfo * channels) {
+
+    if (getChannelIndex(currentChannel) != -1) {
+        char * command = malloc(MAX_CHANNEL_NAME + 6);
+        sprintf(command, "/quit %s", getChannelName(currentChannel));
+        quitChannel(channels, user, command);
+    }
     memset(buffer, '\0', MAX_BUFFER_SIZE);
     buffer = "You will be terminated\n";
     do_send("You will be terminated",structPollFd->fd , "SERVER");

@@ -82,6 +82,7 @@ void sendFile(char * buffer, int sock, pthread_mutex_t * lock, pthread_cond_t * 
 
         if (*canSend == YES) {
             int wrSockP2P = do_accept(sockP2P, sockP2PAddr);
+
             char * filename = getFilename(path);
             fseek(fileToSend, 0, SEEK_END);
             int fileSize = ftell(fileToSend);

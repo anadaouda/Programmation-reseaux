@@ -161,6 +161,8 @@ time.h
 -
 pthread.h
 -
+sys/time.h
+-
 header/constant.h
 /home/ana/Documents/S7/ProjetRes/src/header/constant.h
 

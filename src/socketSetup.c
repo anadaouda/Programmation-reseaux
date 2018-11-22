@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <time.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #include "header/constant.h"
 
@@ -52,7 +53,7 @@ void do_listen(int sock) {
 int do_accept(int sock, struct sockaddr_in sockAddr) {
     int addrLen = sizeof(struct sockaddr);
     int rdwrSock = accept(sock, (struct sockaddr *) &sockAddr, (socklen_t *)&addrLen);
-    if (rdwrSock == -1) {
+    if (rdwrSock == -1){
         perror("Accept");
         exit(EXIT_FAILURE);
     }
@@ -71,8 +72,10 @@ int do_socket() {
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
         perror("ERROR setting socket options");
     }
+
     return sock;
 }
+
 
 void do_connect(int sock, struct sockaddr * sockAddr) {
     printf("Connecting ...");

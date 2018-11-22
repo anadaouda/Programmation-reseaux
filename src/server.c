@@ -90,12 +90,12 @@ int main(int argc, char** argv) {
                         else if (!strcmp(command, "/msg" )) { msg(currentUser, users, structPollFd, buffer);}
                         else if (!strcmp(command, "/createchannel" )) { newChannel(channels, buffer);}
                         else if (!strcmp(command, "/join" )) { join(channels, currentUser, users,buffer);}
-                        else if (!strcmp(command, "/quit" )) { quit(buffer, &structPollFd[i], i, users);}
+                        else if (!strcmp(command, "/quit" )) { quit(buffer, &structPollFd[i], i, users, NULL, NULL, NULL);}
                         else if (!strcmp(command, "/send" )) { sendCheck(structPollFd, buffer, users, currentUser);}
 
                     } else if (isLoggedIn(currentUser) == NO) { //if client is not connected
                         if (!strcmp(command, "/quit")) {
-                            quit(buffer, &structPollFd[i], i, users);
+                            quit(buffer, &structPollFd[i], i, users, NULL, NULL, NULL);
                             break;
                         }
                         loggedIn(buffer, users, structPollFd[i].fd, currentUser);
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
                         if (!strncmp(buffer, "/quit ", 6)) { quitChannel(channels,currentUser, buffer);}
                         else if (!strcmp(command, "/who")) { who(buffer, users, isInChannel(currentUser));}
                         else if (!strcmp(buffer, "/quit\n")) {
-                            quit(buffer, &structPollFd[i], i, users);
+                            quit(buffer, &structPollFd[i], i, users, currentChannel, currentUser, channels);
                             break;
 
                         } else {

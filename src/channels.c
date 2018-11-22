@@ -102,9 +102,11 @@ void deleteChannel(int index, struct channelInfo * channel) {
     while((current->next != NULL)&&(current->next->index != index)) {
         current = current->next;
     }
+
     if (current != NULL) {
         toDelete = current->next;
         current->next = current->next->next;
+        printf("%s has been destroyed\n",toDelete->name);
         free(toDelete);
     }
 }

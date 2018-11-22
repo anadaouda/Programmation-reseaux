@@ -45,6 +45,8 @@ void * writeThread(void * args) {
 
         if (!strncmp(buffer, "/send ", 6)) {
             sendFile(buffer,sock,lock, cond,canSend);
+            printf("HEllo\n");
+            fflush(stdout);
 
         } else {
             do_send(buffer, sock, NULL);
@@ -107,7 +109,7 @@ void * readThread(void * args) {
         } else {
             printf("%s\n",buffer);
             fflush(stdout);
-            
+
         }
     }
     return NULL;
@@ -126,7 +128,7 @@ int main(int argc,char** argv) {
 
 
     struct sockaddr_in sockServerAddr = get_addr_info(argv[1], atoi(argv[2]));
-    int sock = do_socket();
+    int sock = do_socket(CLIENT);
 
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));
