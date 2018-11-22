@@ -10,11 +10,12 @@
 #include <limits.h>
 #include <time.h>
 #include <pthread.h>
+#include <poll.h>
 
 #include "header/constant.h"
 #include "header/P2P.h"
 #include "header/socketSetup.h"
-
+#include "header/users.h"
 
 struct threadArgs {
     int sock;
@@ -128,7 +129,7 @@ int main(int argc,char** argv) {
 
 
     struct sockaddr_in sockServerAddr = get_addr_info(argv[1], atoi(argv[2]));
-    int sock = do_socket(CLIENT);
+    int sock = do_socket();
 
     do_connect(sock, (struct sockaddr * )&sockServerAddr);
     char * buffer = malloc(MAX_BUFFER_SIZE*sizeof(char));

@@ -67,16 +67,20 @@ time.h
 -
 pthread.h
 -
+poll.h
+-
 header/constant.h
 /home/ana/Documents/S7/ProjetRes/src/header/constant.h
 header/P2P.h
 /home/ana/Documents/S7/ProjetRes/src/header/P2P.h
 header/socketSetup.h
 /home/ana/Documents/S7/ProjetRes/src/header/socketSetup.h
+header/users.h
+/home/ana/Documents/S7/ProjetRes/src/header/users.h
 
 /home/ana/Documents/S7/ProjetRes/src/header/P2P.h
-poll.h
--
+users.h
+/home/ana/Documents/S7/ProjetRes/src/header/users.h
 
 /home/ana/Documents/S7/ProjetRes/src/header/channels.h
 

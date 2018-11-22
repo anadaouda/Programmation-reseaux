@@ -11,6 +11,7 @@ CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/ProjetRes/src/cli
 CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/ProjetRes/src/header/P2P.h
 CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/ProjetRes/src/header/constant.h
 CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/ProjetRes/src/header/socketSetup.h
+CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/ProjetRes/src/header/users.h
 
 CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o: /home/ana/Documents/S7/ProjetRes/src/header/constant.h
 CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o: /home/ana/Documents/S7/ProjetRes/src/socketSetup.c

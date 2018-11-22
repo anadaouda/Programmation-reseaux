@@ -66,7 +66,7 @@ struct channelInfo * searchChannelByIndex(struct channelInfo * channel, int inde
     return current;
 }
 
-
+//c'est juste un test
 void newChannel(struct channelInfo * channels, char * buffer) {
     char * name = malloc(MAX_CHANNEL_NAME);
     sscanf(buffer, "/createchannel %s", name);

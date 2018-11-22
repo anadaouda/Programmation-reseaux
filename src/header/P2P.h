@@ -1,7 +1,7 @@
 #ifndef P2P_H_
 #define P2P_H_
 
-#include <poll.h>
+#include "users.h"
 
 void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * users, struct userInfo * sender);
 char * getFilename(char * path);

@@ -5,8 +5,10 @@ rm -rf build
 mkdir build
 cd build
 mkdir .re216
-cd .re216
-mkdir inbox
-cd ..
+mkdir .re216/inbox
+mkdir files
+touch files/fichier.txt
+echo "This is a test" >> files/fichier.txt
+
 cmake -G"Eclipse CDT4 - Unix Makefiles" -D CMAKE_BUILD_TYPE=Debug ../src/
 make
