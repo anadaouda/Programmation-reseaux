@@ -47,7 +47,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>/home/ana/Documents/S7/Programmation réseaux/build</value>
+					<value>/home/ana/Documents/S7/ProjetRes/build</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>
@@ -83,7 +83,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.build.location</key>
-					<value>/home/ana/Documents/S7/Programmation réseaux/build</value>
+					<value>/home/ana/Documents/S7/ProjetRes/build</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.autoBuildTarget</key>
@@ -111,7 +111,7 @@
 		<link>
 			<name>[Source directory]</name>
 			<type>2</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src</location>
 		</link>
 		<link>
 			<name>[Subprojects]</name>
@@ -121,7 +121,7 @@
 		<link>
 			<name>[Subprojects]/RE216</name>
 			<type>2</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src</location>
 		</link>
 		<link>
 			<name>[Targets]</name>
@@ -146,35 +146,32 @@
 		<link>
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/channels.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/channels.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/channels.c</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/users.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/users.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/users.c</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/serverFunctions.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/serverFunctions.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/serverFunctions.c</location>
 		</link>
 		<link>
-<<<<<<< HEAD
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/P2P.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/P2P.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/P2P.c</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/socketSetup.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/socketSetup.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/socketSetup.c</location>
 		</link>
 		<link>
-=======
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 			<name>[Targets]/[exe] RE216_SERVER/Source Files/server.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/server.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/server.c</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] RE216_SERVER/Header Files</name>
@@ -214,22 +211,24 @@
 		<link>
 			<name>[Targets]/[exe] RE216_CLIENT/Source Files/client.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/client.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/client.c</location>
 		</link>
 		<link>
-<<<<<<< HEAD
 			<name>[Targets]/[exe] RE216_CLIENT/Source Files/P2P.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/P2P.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/P2P.c</location>
+		</link>
+		<link>
+			<name>[Targets]/[exe] RE216_CLIENT/Source Files/users.c</name>
+			<type>1</type>
+			<location>/home/ana/Documents/S7/ProjetRes/src/users.c</location>
 		</link>
 		<link>
 			<name>[Targets]/[exe] RE216_CLIENT/Source Files/socketSetup.c</name>
 			<type>1</type>
-			<location>/home/ana/Documents/S7/Programmation réseaux/src/socketSetup.c</location>
+			<location>/home/ana/Documents/S7/ProjetRes/src/socketSetup.c</location>
 		</link>
 		<link>
-=======
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 			<name>[Targets]/[exe] RE216_CLIENT/Header Files</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>

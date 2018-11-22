@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/ana/Documents/S7/Programmation réseaux/src"
+CMAKE_SOURCE_DIR = /home/ana/Documents/S7/ProjetRes/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/ana/Documents/S7/Programmation réseaux/build"
+CMAKE_BINARY_DIR = /home/ana/Documents/S7/ProjetRes/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/RE216_CLIENT.dir/depend.make
@@ -58,17 +58,17 @@ include CMakeFiles/RE216_CLIENT.dir/progress.make
 include CMakeFiles/RE216_CLIENT.dir/flags.make
 
 CMakeFiles/RE216_CLIENT.dir/client.c.o: CMakeFiles/RE216_CLIENT.dir/flags.make
-CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/client.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/RE216_CLIENT.dir/client.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/client.c.o   -c "/home/ana/Documents/S7/Programmation réseaux/src/client.c"
+CMakeFiles/RE216_CLIENT.dir/client.c.o: /home/ana/Documents/S7/ProjetRes/src/client.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ana/Documents/S7/ProjetRes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/RE216_CLIENT.dir/client.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/client.c.o   -c /home/ana/Documents/S7/ProjetRes/src/client.c
 
 CMakeFiles/RE216_CLIENT.dir/client.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/RE216_CLIENT.dir/client.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ana/Documents/S7/Programmation réseaux/src/client.c" > CMakeFiles/RE216_CLIENT.dir/client.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ana/Documents/S7/ProjetRes/src/client.c > CMakeFiles/RE216_CLIENT.dir/client.c.i
 
 CMakeFiles/RE216_CLIENT.dir/client.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/RE216_CLIENT.dir/client.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ana/Documents/S7/Programmation réseaux/src/client.c" -o CMakeFiles/RE216_CLIENT.dir/client.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ana/Documents/S7/ProjetRes/src/client.c -o CMakeFiles/RE216_CLIENT.dir/client.c.s
 
 CMakeFiles/RE216_CLIENT.dir/client.c.o.requires:
 
@@ -81,19 +81,18 @@ CMakeFiles/RE216_CLIENT.dir/client.c.o.provides: CMakeFiles/RE216_CLIENT.dir/cli
 CMakeFiles/RE216_CLIENT.dir/client.c.o.provides.build: CMakeFiles/RE216_CLIENT.dir/client.c.o
 
 
-<<<<<<< HEAD
 CMakeFiles/RE216_CLIENT.dir/P2P.c.o: CMakeFiles/RE216_CLIENT.dir/flags.make
-CMakeFiles/RE216_CLIENT.dir/P2P.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/P2P.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/RE216_CLIENT.dir/P2P.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/P2P.c.o   -c "/home/ana/Documents/S7/Programmation réseaux/src/P2P.c"
+CMakeFiles/RE216_CLIENT.dir/P2P.c.o: /home/ana/Documents/S7/ProjetRes/src/P2P.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ana/Documents/S7/ProjetRes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/RE216_CLIENT.dir/P2P.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/P2P.c.o   -c /home/ana/Documents/S7/ProjetRes/src/P2P.c
 
 CMakeFiles/RE216_CLIENT.dir/P2P.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/RE216_CLIENT.dir/P2P.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ana/Documents/S7/Programmation réseaux/src/P2P.c" > CMakeFiles/RE216_CLIENT.dir/P2P.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ana/Documents/S7/ProjetRes/src/P2P.c > CMakeFiles/RE216_CLIENT.dir/P2P.c.i
 
 CMakeFiles/RE216_CLIENT.dir/P2P.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/RE216_CLIENT.dir/P2P.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ana/Documents/S7/Programmation réseaux/src/P2P.c" -o CMakeFiles/RE216_CLIENT.dir/P2P.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ana/Documents/S7/ProjetRes/src/P2P.c -o CMakeFiles/RE216_CLIENT.dir/P2P.c.s
 
 CMakeFiles/RE216_CLIENT.dir/P2P.c.o.requires:
 
@@ -106,18 +105,42 @@ CMakeFiles/RE216_CLIENT.dir/P2P.c.o.provides: CMakeFiles/RE216_CLIENT.dir/P2P.c.
 CMakeFiles/RE216_CLIENT.dir/P2P.c.o.provides.build: CMakeFiles/RE216_CLIENT.dir/P2P.c.o
 
 
+CMakeFiles/RE216_CLIENT.dir/users.c.o: CMakeFiles/RE216_CLIENT.dir/flags.make
+CMakeFiles/RE216_CLIENT.dir/users.c.o: /home/ana/Documents/S7/ProjetRes/src/users.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ana/Documents/S7/ProjetRes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/RE216_CLIENT.dir/users.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/users.c.o   -c /home/ana/Documents/S7/ProjetRes/src/users.c
+
+CMakeFiles/RE216_CLIENT.dir/users.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/RE216_CLIENT.dir/users.c.i"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ana/Documents/S7/ProjetRes/src/users.c > CMakeFiles/RE216_CLIENT.dir/users.c.i
+
+CMakeFiles/RE216_CLIENT.dir/users.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/RE216_CLIENT.dir/users.c.s"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ana/Documents/S7/ProjetRes/src/users.c -o CMakeFiles/RE216_CLIENT.dir/users.c.s
+
+CMakeFiles/RE216_CLIENT.dir/users.c.o.requires:
+
+.PHONY : CMakeFiles/RE216_CLIENT.dir/users.c.o.requires
+
+CMakeFiles/RE216_CLIENT.dir/users.c.o.provides: CMakeFiles/RE216_CLIENT.dir/users.c.o.requires
+	$(MAKE) -f CMakeFiles/RE216_CLIENT.dir/build.make CMakeFiles/RE216_CLIENT.dir/users.c.o.provides.build
+.PHONY : CMakeFiles/RE216_CLIENT.dir/users.c.o.provides
+
+CMakeFiles/RE216_CLIENT.dir/users.c.o.provides.build: CMakeFiles/RE216_CLIENT.dir/users.c.o
+
+
 CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o: CMakeFiles/RE216_CLIENT.dir/flags.make
-CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o: /home/ana/Documents/S7/Programmation\ réseaux/src/socketSetup.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o   -c "/home/ana/Documents/S7/Programmation réseaux/src/socketSetup.c"
+CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o: /home/ana/Documents/S7/ProjetRes/src/socketSetup.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ana/Documents/S7/ProjetRes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o   -c /home/ana/Documents/S7/ProjetRes/src/socketSetup.c
 
 CMakeFiles/RE216_CLIENT.dir/socketSetup.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/RE216_CLIENT.dir/socketSetup.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/ana/Documents/S7/Programmation réseaux/src/socketSetup.c" > CMakeFiles/RE216_CLIENT.dir/socketSetup.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ana/Documents/S7/ProjetRes/src/socketSetup.c > CMakeFiles/RE216_CLIENT.dir/socketSetup.c.i
 
 CMakeFiles/RE216_CLIENT.dir/socketSetup.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/RE216_CLIENT.dir/socketSetup.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/ana/Documents/S7/Programmation réseaux/src/socketSetup.c" -o CMakeFiles/RE216_CLIENT.dir/socketSetup.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ana/Documents/S7/ProjetRes/src/socketSetup.c -o CMakeFiles/RE216_CLIENT.dir/socketSetup.c.s
 
 CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o.requires:
 
@@ -134,28 +157,19 @@ CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o.provides.build: CMakeFiles/RE216_CLI
 RE216_CLIENT_OBJECTS = \
 "CMakeFiles/RE216_CLIENT.dir/client.c.o" \
 "CMakeFiles/RE216_CLIENT.dir/P2P.c.o" \
+"CMakeFiles/RE216_CLIENT.dir/users.c.o" \
 "CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o"
-=======
-# Object files for target RE216_CLIENT
-RE216_CLIENT_OBJECTS = \
-"CMakeFiles/RE216_CLIENT.dir/client.c.o"
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 
 # External object files for target RE216_CLIENT
 RE216_CLIENT_EXTERNAL_OBJECTS =
 
 RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/client.c.o
-<<<<<<< HEAD
 RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/P2P.c.o
+RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/users.c.o
 RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o
 RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/build.make
 RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable RE216_CLIENT"
-=======
-RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/build.make
-RE216_CLIENT: CMakeFiles/RE216_CLIENT.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable RE216_CLIENT"
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ana/Documents/S7/ProjetRes/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable RE216_CLIENT"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/RE216_CLIENT.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -164,11 +178,9 @@ CMakeFiles/RE216_CLIENT.dir/build: RE216_CLIENT
 .PHONY : CMakeFiles/RE216_CLIENT.dir/build
 
 CMakeFiles/RE216_CLIENT.dir/requires: CMakeFiles/RE216_CLIENT.dir/client.c.o.requires
-<<<<<<< HEAD
 CMakeFiles/RE216_CLIENT.dir/requires: CMakeFiles/RE216_CLIENT.dir/P2P.c.o.requires
+CMakeFiles/RE216_CLIENT.dir/requires: CMakeFiles/RE216_CLIENT.dir/users.c.o.requires
 CMakeFiles/RE216_CLIENT.dir/requires: CMakeFiles/RE216_CLIENT.dir/socketSetup.c.o.requires
-=======
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 
 .PHONY : CMakeFiles/RE216_CLIENT.dir/requires
 
@@ -177,6 +189,6 @@ CMakeFiles/RE216_CLIENT.dir/clean:
 .PHONY : CMakeFiles/RE216_CLIENT.dir/clean
 
 CMakeFiles/RE216_CLIENT.dir/depend:
-	cd "/home/ana/Documents/S7/Programmation réseaux/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/ana/Documents/S7/Programmation réseaux/src" "/home/ana/Documents/S7/Programmation réseaux/src" "/home/ana/Documents/S7/Programmation réseaux/build" "/home/ana/Documents/S7/Programmation réseaux/build" "/home/ana/Documents/S7/Programmation réseaux/build/CMakeFiles/RE216_CLIENT.dir/DependInfo.cmake" --color=$(COLOR)
+	cd /home/ana/Documents/S7/ProjetRes/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ana/Documents/S7/ProjetRes/src /home/ana/Documents/S7/ProjetRes/src /home/ana/Documents/S7/ProjetRes/build /home/ana/Documents/S7/ProjetRes/build /home/ana/Documents/S7/ProjetRes/build/CMakeFiles/RE216_CLIENT.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/RE216_CLIENT.dir/depend
 

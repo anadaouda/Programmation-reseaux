@@ -66,14 +66,11 @@ struct channelInfo * searchChannelByIndex(struct channelInfo * channel, int inde
     return current;
 }
 
-<<<<<<< HEAD
+
 void newChannel(struct channelInfo * channels, char * buffer) {
     char * name = malloc(MAX_CHANNEL_NAME);
     sscanf(buffer, "/createchannel %s", name);
 
-=======
-void newChannel(struct channelInfo * channels, char * name, char * buffer) {
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     struct channelInfo * verification = searchByChannelName(channels, name);
 
     if (verification == NULL) {
@@ -112,14 +109,11 @@ void deleteChannel(int index, struct channelInfo * channel) {
     }
 }
 
-<<<<<<< HEAD
+
 void join(struct channelInfo * channels, struct userInfo * user,struct userInfo * users, char * buffer) {
     char * name = malloc(MAX_CHANNEL_NAME);
     sscanf(buffer, "/join %s", name);
 
-=======
-void join(struct channelInfo * channels, char * name, struct userInfo * user,struct userInfo * users, char * buffer) {
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
     struct channelInfo * channel = searchByChannelName(channels, name);
     if (channel != NULL) {
         setChannel(user, channel->index);
@@ -131,17 +125,14 @@ void join(struct channelInfo * channels, char * name, struct userInfo * user,str
     }
 }
 
-<<<<<<< HEAD
+
 void quitChannel(struct channelInfo * channels, struct userInfo * user, char * buffer) {
     char * name = malloc(MAX_CHANNEL_NAME);
     sscanf(buffer, "/quit %s", name);
 
     struct channelInfo * channel = searchByChannelName(channels, name);
 
-=======
-void quitChannel(struct channelInfo * channels, char * name, struct userInfo * user, char * buffer) {
-    struct channelInfo * channel = searchByChannelName(channels, name);
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
+
     if ((channel !=NULL)&&(getChannelIndex(channel) == isInChannel(user))) {
         setChannel(user, -1);
         channel->nbUsers--;
@@ -156,11 +147,9 @@ void quitChannel(struct channelInfo * channels, char * name, struct userInfo * u
     else {
         sprintf(buffer, "You are not in this channel\n");
     }
-<<<<<<< HEAD
+
 
     free(name);
-=======
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
 }
 
 void channelList(char * buffer, struct channelInfo * channels) {

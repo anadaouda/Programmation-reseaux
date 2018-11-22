@@ -17,29 +17,6 @@
 #include "header/channels.h"
 #include "header/socketSetup.h"
 
-
-void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * users, char * username, struct userInfo * sender, int portP2P, char * filename) {
-    struct userInfo * recipient = searchByUsername(users, username);
-
-    memset(buffer, '\0', MAX_BUFFER_SIZE);
-
-    if ((recipient != NULL)&&(recipient != sender)) {
-        char * confirm = malloc(100);
-
-        setP2P(recipient, getIndex(sender)); //setP2Ppeer
-        setPortP2P(sender,portP2P);
-
-        sprintf(confirm, "%s wants you to accept the transfer of the file named '%s'. Do you accept? [Y/n]", username, filename);
-        sprintf(buffer,"%s", "/sendCheck ok");
-
-        do_send(confirm, structPollFd[getIndex(recipient)].fd, "SERVER");
-
-    } else {
-        sprintf(buffer, "%s", "/sendCheck error");
-
-    }
-}
-
 char * getFilename(char * path) {
     int i, j;
     char * result = malloc(strlen(path));
@@ -54,6 +31,33 @@ char * getFilename(char * path) {
     strcpy(result, path + position);
     return result;
 }
+
+void sendCheck(struct pollfd structPollFd[], char * buffer, struct userInfo * users, struct userInfo * sender) {
+    char * username = malloc(MAX_USERNAME);
+    char * path = malloc(MAX_BUFFER_SIZE);
+    int portP2P;
+    sscanf(buffer, "/send %s %s %i", username, path, &portP2P);
+    struct userInfo * recipient = searchByUsername(users, username);
+
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
+
+    if ((recipient != NULL)&&(recipient != sender)) {
+        char * confirm = malloc(100);
+
+        setP2P(recipient, getIndex(sender)); //setP2Ppeer
+        setPortP2P(sender,portP2P);
+
+        sprintf(confirm, "%s wants you to accept the transfer of the file named '%s'. Do you accept? [Y/n]", getUsername(sender), getFilename(path));
+        sprintf(buffer,"%s", "/sendCheck ok");
+
+        do_send(confirm, structPollFd[getIndex(recipient)].fd, "SERVER");
+
+    } else {
+        sprintf(buffer, "%s", "/sendCheck error");
+
+    }
+}
+
 
 void sendFile(char * buffer, int sock, pthread_mutex_t * lock, pthread_cond_t * cond, int * canSend) {
     char * path = malloc(MAX_BUFFER_SIZE);
@@ -90,9 +94,6 @@ void sendFile(char * buffer, int sock, pthread_mutex_t * lock, pthread_cond_t * 
             sprintf(fileToSendStr, "%s %s", filename, file);
 
             do_send(fileToSendStr, wrSockP2P, NULL);
-
-            free(fileToSendStr);
-
         }
         *canSend = UNCLEAR;
         pthread_mutex_unlock(lock);
@@ -115,8 +116,8 @@ void recvFile(char * buffer) {
     int sockP2P = do_socket();
     do_connect(sockP2P, (struct sockaddr * )&sockAddrP2P);
 
-    do_receive(sockP2P, fileReceived, 1,0);
-    sscanf(fileReceived, "%s ", filename);
+    do_receive(sockP2P, fileReceived, CLIENT);
+    sscanf(fileReceived, "%s", filename);
     char * file = fileReceived + strlen(filename)+1;
 
     char * path = malloc((strlen(INBOX_DIR)+strlen(filename) + 1)*sizeof(char));
@@ -126,12 +127,11 @@ void recvFile(char * buffer) {
     fclose(fileToSave);
 
     printf("%s saved in %s\n", filename, INBOX_DIR);
-    fflush(stdout);
-
+    sprintf(buffer, "%s", "/P2Pdone");
     close(sockP2P);
 }
 
-void confirmP2P(char * buffer, struct userInfo * recipient, struct userInfo * sender, struct userInfo * users, struct pollfd structPollFd[], int index) {
+void confirmP2P(char * buffer, struct userInfo * recipient, struct userInfo * users, struct pollfd structPollFd[]) {
     char * confirm = malloc(100);
 
     if((!strcmp(buffer, "y\n"))||(!strcmp(buffer, "Y\n"))) {
@@ -141,13 +141,20 @@ void confirmP2P(char * buffer, struct userInfo * recipient, struct userInfo * se
         sprintf(buffer, "/recvFile %s %i", getIP(sender), getPortP2P(sender));
 
         do_send(confirm,structPollFd[isInP2P(recipient)].fd, "SERVER");
-        do_send( buffer,structPollFd[index].fd, "SERVER");
 
     } else if((!strcmp(buffer, "n\n"))||(!strcmp(buffer, "N\n"))) {
         sprintf(confirm, "%s cancelled file transfert", getUsername(recipient));
         do_send(confirm, structPollFd[isInP2P(recipient)].fd,  "SERVER");
     }
 
+    free(confirm);
+}
+
+
+void endP2P(struct userInfo * recipient, struct pollfd structPollFd[]) {
+    char * confirm = malloc(100);
+    sprintf(confirm, "%s received file", getUsername(recipient));
+    do_send(confirm,structPollFd[isInP2P(recipient)].fd, "SERVER");
     setP2P(recipient, NO);
     free(confirm);
 }

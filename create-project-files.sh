@@ -4,5 +4,9 @@
 rm -rf build
 mkdir build
 cd build
+mkdir .re216
+cd .re216
+mkdir inbox
+cd ..
 cmake -G"Eclipse CDT4 - Unix Makefiles" -D CMAKE_BUILD_TYPE=Debug ../src/
 make

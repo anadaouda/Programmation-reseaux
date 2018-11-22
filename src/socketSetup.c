@@ -87,7 +87,7 @@ void do_connect(int sock, struct sockaddr * sockAddr) {
 
 void do_send(char * buffer, int sock, char * who) {
     int strSent;
-    int inputLen = strlen(buffer);
+    int inputLen;
 
     if (who != NULL) {
         char * sender = malloc(MAX_BUFFER_SIZE);
@@ -95,6 +95,8 @@ void do_send(char * buffer, int sock, char * who) {
         strcat(sender, buffer);
         buffer = sender;
     }
+
+    inputLen = strlen(buffer);
 
     do {
         strSent = send(sock,&inputLen,sizeof(int),0);
@@ -111,9 +113,11 @@ void do_send(char * buffer, int sock, char * who) {
             exit(EXIT_FAILURE);
         }
     } while (strSent != strlen(buffer));
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
 }
 
-void do_receive(int sock, char * buffer, int type, int rdwrSock) {
+void do_receive(int sock, char * buffer, int type) {
+    memset(buffer, '\0', MAX_BUFFER_SIZE);
         int strReceived, strSizeToReceive;
         do {
             strReceived = recv(sock, &strSizeToReceive, sizeof(int), 0);
@@ -123,8 +127,9 @@ void do_receive(int sock, char * buffer, int type, int rdwrSock) {
             }
         } while (strReceived != sizeof(int));
 
+
         do {
-            strReceived = recv(sock, buffer, SSIZE_MAX, 0);
+            strReceived = recv(sock, buffer, strSizeToReceive, 0);
             if (strReceived == -1) {
                 perror("Receive");
                 exit(EXIT_FAILURE);
@@ -132,7 +137,7 @@ void do_receive(int sock, char * buffer, int type, int rdwrSock) {
         } while (strReceived != strSizeToReceive);
 
         if (type == SERVER) {
-            printf("[%i] : %s\n",rdwrSock, buffer);
+            printf("[%i] : %s\n",sock, buffer);
             fflush(stdout);
         }
 }

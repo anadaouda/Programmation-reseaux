@@ -2,11 +2,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/RE216_SERVER.dir/channels.c.o"
   "CMakeFiles/RE216_SERVER.dir/users.c.o"
   "CMakeFiles/RE216_SERVER.dir/serverFunctions.c.o"
-<<<<<<< HEAD
   "CMakeFiles/RE216_SERVER.dir/P2P.c.o"
   "CMakeFiles/RE216_SERVER.dir/socketSetup.c.o"
-=======
->>>>>>> fc939c25de2d3c2a3649dd53301ee61fa9fc4e82
   "CMakeFiles/RE216_SERVER.dir/server.c.o"
   "RE216_SERVER.pdb"
   "RE216_SERVER"
